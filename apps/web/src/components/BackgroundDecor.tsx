@@ -6,25 +6,30 @@
  *
  *   • a "wave" that splits the page into two colours (red on top,
  *     cream below) — echoing the burger-site reference
- *   • scattered food emoji "stickers" floating around the edges
+ *   • realistic food cutout images floating around the edges, framing the
+ *     content the way the reference site does
  *
- * Nothing here is interactive; it's a backdrop only.
+ * Food images are served from `apps/web/public/food/`. Drop transparent
+ * PNG cutouts there using the filenames listed in FOOD below. Any file
+ * that isn't present yet is hidden automatically (onError), so the page
+ * never shows a broken image while assets are still being added.
  */
 
 const TOP_COLOR = '#FF3B30'; // bold red, top band
 const BOTTOM_COLOR = '#F2E4CC'; // warm cream, bottom band
 
-// Food "stickers" scattered around the margins. Positions are kept toward the
-// edges so they frame the content without sitting under the readable middle.
+// Floating food cutouts. `src` points at /food/<file> in the public dir.
+// Positions are kept toward the edges so they frame the content rather than
+// sit under the readable middle.
 const FOOD = [
-  { emoji: '🍔', top: '6%', left: '4%', size: 64, rotate: -12 },
-  { emoji: '🍟', top: '14%', right: '5%', size: 56, rotate: 14 },
-  { emoji: '🥬', top: '46%', left: '3%', size: 52, rotate: -8 },
-  { emoji: '🍅', top: '40%', right: '4%', size: 48, rotate: 16 },
-  { emoji: '🧀', bottom: '24%', left: '6%', size: 50, rotate: 10 },
-  { emoji: '🥒', bottom: '14%', right: '7%', size: 46, rotate: -14 },
-  { emoji: '🥤', bottom: '6%', left: '12%', size: 54, rotate: 8 },
-  { emoji: '🌶️', top: '70%', right: '12%', size: 44, rotate: -10 },
+  { src: '/food/burger.png', top: '5%', left: '3%', size: 150, rotate: -10 },
+  { src: '/food/fries.png', top: '12%', right: '4%', size: 130, rotate: 12 },
+  { src: '/food/lettuce.png', top: '44%', left: '2%', size: 120, rotate: -8 },
+  { src: '/food/tomato.png', top: '38%', right: '3%', size: 110, rotate: 14 },
+  { src: '/food/cheese.png', bottom: '22%', left: '5%', size: 115, rotate: 10 },
+  { src: '/food/cucumber.png', bottom: '12%', right: '6%', size: 105, rotate: -14 },
+  { src: '/food/drink.png', bottom: '5%', left: '11%', size: 120, rotate: 6 },
+  { src: '/food/chili.png', top: '68%', right: '11%', size: 95, rotate: -10 },
 ];
 
 export function BackgroundDecor() {
@@ -72,25 +77,30 @@ export function BackgroundDecor() {
         />
       </svg>
 
-      {/* Floating food stickers */}
-      {FOOD.map((f, i) => (
-        <span
-          key={i}
+      {/* Floating food cutouts */}
+      {FOOD.map((f) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={f.src}
+          src={f.src}
+          alt=""
+          // Hide gracefully if the asset hasn't been uploaded yet.
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = 'none';
+          }}
           style={{
             position: 'absolute',
             top: f.top,
             bottom: f.bottom,
             left: f.left,
             right: f.right,
-            fontSize: f.size,
-            lineHeight: 1,
+            width: f.size,
+            height: 'auto',
             transform: `rotate(${f.rotate}deg)`,
-            filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.18))',
+            filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.22))',
             userSelect: 'none',
           }}
-        >
-          {f.emoji}
-        </span>
+        />
       ))}
     </div>
   );
