@@ -29,7 +29,7 @@ export default async function JoinPage({ params }: PageProps) {
 
   if (errorMessage || !sessionId) {
     return (
-      <main style={{ padding: '2rem', fontFamily: 'system-ui' }}>
+      <main style={{ padding: '2rem', fontFamily: 'var(--font-body)' }}>
         <h1>Tally</h1>
         <p style={{ color: 'red' }}>{errorMessage}</p>
       </main>
@@ -37,7 +37,7 @@ export default async function JoinPage({ params }: PageProps) {
   }
 
   return (
-    <main style={{ padding: '2rem', fontFamily: 'system-ui' }}>
+    <main style={{ padding: '2rem', fontFamily: 'var(--font-body)' }}>
       <h1>Tally</h1>
       <p>Joining: <strong>{sessionName}</strong></p>
       <GuestJoinForm sessionId={sessionId} />

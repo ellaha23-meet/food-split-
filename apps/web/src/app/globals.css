@@ -1,0 +1,282 @@
+/* ===================================================================
+   CRAV-style theme for Tally
+   A bold, playful smash-burger look: warm cream canvas, punchy red,
+   golden-yellow accents, fat rounded "sticker" display type.
+   Closest free Google Font substitutes for the original brand faces.
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ---- palette ---- */
+  --crav-cream: #ecdcbd; /* page canvas (tan) */
+  --crav-cream-soft: #f6ecd6; /* lighter cream panels */
+  --crav-cream-line: #e0cda6; /* hairline / input borders */
+  --crav-red: #fb2a1b; /* primary brand red */
+  --crav-red-dark: #d81e10;
+  --crav-yellow: #fbc63b; /* accent yellow */
+  --crav-yellow-soft: #ffe08a;
+  --crav-ink: #20160e; /* near-black warm text */
+  --crav-ink-soft: #6b5b46; /* muted brown text */
+  --crav-white: #fffdf7; /* warm card white */
+  --crav-bit: #00c2c7; /* keep Bit's own teal */
+
+  /* ---- type ---- */
+  --font-display: 'Luckiest Guy', system-ui, cursive; /* logo / headings */
+  --font-fat: 'Anton', 'Luckiest Guy', sans-serif; /* huge condensed */
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+
+  /* ---- spacing scale ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ---- shape ---- */
+  --radius-pill: 999px;
+  --radius-card: 18px;
+  --shadow-hard: 4px 4px 0 var(--crav-ink); /* sticker drop shadow */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--crav-cream);
+  background-image: radial-gradient(
+    120% 60% at 50% -10%,
+    var(--crav-yellow-soft) 0%,
+    var(--crav-cream) 55%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--crav-ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ---- headings: fat rounded display, in brand red ---- */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400; /* Luckiest Guy ships a single weight */
+  color: var(--crav-red);
+  letter-spacing: 0.5px;
+  line-height: 1.02;
+  text-transform: uppercase;
+  margin: 0 0 var(--sp-4);
+  /* soft white outline so red type pops on cream, like the CRAV stickers */
+  text-shadow:
+    2px 2px 0 #fff,
+    -1px -1px 0 #fff;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 6vw, 4rem);
+}
+h2 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+h3 {
+  font-size: 1.3rem;
+}
+
+a {
+  color: var(--crav-red-dark);
+}
+
+/* ---- default buttons → fat red sticker pills ---- */
+button {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  color: var(--crav-white);
+  background: var(--crav-red);
+  border: 2px solid var(--crav-ink);
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-hard);
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.06s ease,
+    filter 0.12s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--crav-ink);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.5) brightness(0.98);
+  box-shadow: 2px 2px 0 var(--crav-ink);
+}
+
+/* ---- inputs: rounded, cream-tinted, bold border ---- */
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--crav-ink);
+  background: var(--crav-white);
+  border: 2px solid var(--crav-cream-line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--crav-red);
+}
+
+/* ---- tables read as clean cream cards ---- */
+table {
+  background: transparent;
+}
+
+th {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--crav-ink-soft);
+}
+
+td {
+  padding: 4px 2px;
+}
+
+hr {
+  border: none;
+  border-top: 3px dashed var(--crav-yellow);
+  margin: var(--sp-5) 0;
+}
+
+strong {
+  font-weight: 800;
+}
+
+/* ===================================================================
+   App chrome — the branded header + canvas, injected by layout.tsx
+   =================================================================== */
+
+.crav-shell {
+  min-height: 100vh;
+}
+
+.crav-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: 14px clamp(16px, 4vw, 40px);
+  background: linear-gradient(var(--crav-cream), rgba(236, 220, 189, 0.82));
+  backdrop-filter: blur(6px);
+}
+
+.crav-logo {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  color: var(--crav-red);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transform: rotate(-3deg);
+  text-shadow:
+    2px 2px 0 #fff,
+    3px 3px 0 var(--crav-ink);
+}
+
+.crav-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.crav-pill {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  font-size: 0.95rem;
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--crav-ink);
+  box-shadow: var(--shadow-hard);
+  display: inline-block;
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.06s ease;
+}
+
+.crav-pill:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--crav-ink);
+}
+
+.crav-pill--red {
+  background: var(--crav-red);
+  color: var(--crav-white);
+}
+
+.crav-pill--ghost {
+  background: transparent;
+  color: var(--crav-ink);
+}
+
+/* sticker tagline used in the header strip */
+.crav-tagline {
+  display: inline-block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  color: var(--crav-red);
+  background: var(--crav-white);
+  border: 2px solid var(--crav-ink);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  transform: rotate(-2deg);
+  box-shadow: var(--shadow-hard);
+}
+
+.crav-canvas {
+  position: relative;
+}
+
+.crav-footer {
+  text-align: center;
+  padding: var(--sp-6) var(--sp-4);
+  color: var(--crav-ink-soft);
+  font-weight: 700;
+}
+
+.crav-footer .crav-logo {
+  font-size: 1.4rem;
+  display: inline-block;
+}

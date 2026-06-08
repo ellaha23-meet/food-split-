@@ -169,11 +169,11 @@ export function Prototype() {
         <h2>Scan the receipt</h2>
         <div
           style={{
-            border: '2px dashed #CBD5E1',
+            border: '2px dashed var(--crav-cream-line)',
             borderRadius: 16,
             padding: 32,
             textAlign: 'center',
-            background: '#F8FAFC',
+            background: '#FBF1DC',
             maxWidth: 460,
           }}
         >
@@ -189,7 +189,7 @@ export function Prototype() {
           )}
 
           {phase === 'scanning' ? (
-            <p style={{ marginTop: 16, fontWeight: 600, color: '#2563EB' }}>Reading your receipt…</p>
+            <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--crav-red)' }}>Reading your receipt…</p>
           ) : (
             <>
               <p style={{ marginTop: 12, color: '#475569' }}>
@@ -400,7 +400,7 @@ export function Prototype() {
                     <div>
                       <strong>{it.name || 'Item'}</strong>{' '}
                       <span style={{ color: '#64748B' }}>{fmt(itemTotal(it))}</span>
-                      <span style={{ fontSize: 12, color: '#2563EB', marginLeft: 6 }}>
+                      <span style={{ fontSize: 12, color: 'var(--crav-red)', marginLeft: 6 }}>
                         split ×{cs.length} = {fmt(Math.round(itemTotal(it) / cs.length))} each
                       </span>
                     </div>
@@ -478,7 +478,7 @@ export function Prototype() {
                         >
                           <span>
                             {item.name || 'Item'}{' '}
-                            {shared && <span style={{ fontSize: 11, color: '#2563EB' }}>(shared)</span>}
+                            {shared && <span style={{ fontSize: 11, color: 'var(--crav-red)' }}>(shared)</span>}
                           </span>
                           <span>{fmt(shareCents)}</span>
                         </li>
@@ -508,7 +508,7 @@ export function Prototype() {
                         fontWeight: 800,
                         fontSize: 15,
                         color: canPay ? '#062E2E' : '#64748B',
-                        background: canPay ? '#00C2C7' : '#CBD5E1',
+                        background: canPay ? '#00C2C7' : 'var(--crav-cream-line)',
                         border: 'none',
                         borderRadius: 12,
                         cursor: canPay ? 'pointer' : 'not-allowed',
@@ -582,12 +582,17 @@ export function Prototype() {
               onClick={() => toggleClaim(it.id)}
               disabled={!activeId}
               style={{
+                fontFamily: 'var(--font-body)',
+                textTransform: 'none',
+                letterSpacing: 'normal',
+                color: 'var(--crav-ink)',
                 textAlign: 'left',
                 padding: 12,
                 borderRadius: 10,
+                boxShadow: '3px 3px 0 var(--crav-ink)',
                 cursor: activeId ? 'pointer' : 'default',
-                border: mine ? '2px solid #2563EB' : '1px solid #E5E7EB',
-                background: unclaimed ? '#FEE2E2' : mine ? '#EFF6FF' : '#fff',
+                border: mine ? '2px solid var(--crav-red)' : '2px solid var(--crav-ink)',
+                background: unclaimed ? '#FEE2E2' : mine ? '#FFF3E2' : '#fff',
                 outline: unclaimed ? '2px dashed #DC2626' : 'none',
               }}
             >
@@ -602,7 +607,7 @@ export function Prototype() {
                   />
                 ))}
                 {claimers.length > 1 && (
-                  <span style={{ fontSize: 11, color: '#2563EB' }}>split ×{claimers.length}</span>
+                  <span style={{ fontSize: 11, color: 'var(--crav-red)' }}>split ×{claimers.length}</span>
                 )}
                 {unclaimed && <span style={{ fontSize: 11, color: '#DC2626' }}>UNCLAIMED</span>}
               </div>
@@ -736,7 +741,7 @@ function DinerBar({
             padding: '6px 12px',
             borderRadius: 999,
             cursor: 'pointer',
-            border: d.id === activeId ? '2px solid #0F172A' : '1px solid #CBD5E1',
+            border: d.id === activeId ? '2px solid #0F172A' : '1px solid var(--crav-cream-line)',
             background: d.id === activeId ? '#0F172A' : '#fff',
             color: d.id === activeId ? '#fff' : '#0F172A',
             fontWeight: 600,
@@ -799,8 +804,8 @@ function DinerPanel({
       style={{
         marginTop: 16,
         padding: 16,
-        background: '#F0F9FF',
-        border: '1px solid #BAE6FD',
+        background: '#FBF1DC',
+        border: '1px solid var(--crav-yellow)',
         borderRadius: 12,
       }}
     >
@@ -820,8 +825,8 @@ function DinerPanel({
               style={{
                 padding: '8px 14px',
                 borderRadius: 999,
-                border: active ? '2px solid #2563EB' : '1px solid #CBD5E1',
-                background: active ? '#2563EB' : '#fff',
+                border: active ? '2px solid var(--crav-red)' : '1px solid var(--crav-cream-line)',
+                background: active ? 'var(--crav-red)' : '#fff',
                 color: active ? '#fff' : '#0F172A',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -981,7 +986,7 @@ function BitModal({
                 style={{
                   marginTop: 16,
                   padding: '10px 12px',
-                  background: '#F1F5F9',
+                  background: '#FBF1DC',
                   borderRadius: 10,
                   fontSize: 13,
                   color: '#64748B',
@@ -1034,9 +1039,19 @@ function BitModal({
 // ── shared layout + style helpers ──────────────────────────────────────
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '2rem', maxWidth: 760, margin: '0 auto' }}>
-      <h1 style={{ marginBottom: 0 }}>Tally</h1>
-      <p style={{ color: '#555', marginTop: 6 }}>
+    <main
+      style={{
+        fontFamily: 'var(--font-body)',
+        padding: 'clamp(1.25rem, 4vw, 2.5rem)',
+        maxWidth: 820,
+        margin: '0 auto',
+      }}
+    >
+      <span className="crav-tagline">Feel the change</span>
+      <h1 style={{ marginTop: 12, marginBottom: 0, fontSize: 'clamp(3rem, 8vw, 5rem)' }}>
+        Split it.
+      </h1>
+      <p style={{ color: 'var(--crav-ink-soft)', marginTop: 6, fontWeight: 700, fontSize: 17 }}>
         Snap the receipt, tap what you had, add your tip, and pay with Bit.
       </p>
       {children}
@@ -1045,20 +1060,18 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 const primaryBtn: React.CSSProperties = {
-  marginTop: 12,
-  padding: '12px 24px',
-  fontWeight: 700,
-  background: '#2563EB',
+  marginTop: 16,
+  padding: '14px 30px',
+  fontSize: '1.05rem',
+  background: 'var(--crav-red)',
   color: '#fff',
-  border: 'none',
-  borderRadius: 10,
   cursor: 'pointer',
 };
 
 const linkBtn: React.CSSProperties = {
   background: 'none',
   border: 'none',
-  color: '#2563EB',
+  color: 'var(--crav-red)',
   textDecoration: 'underline',
   cursor: 'pointer',
   fontSize: 14,
@@ -1084,7 +1097,7 @@ const mealList: React.CSSProperties = {
 
 const mealRow: React.CSSProperties = {
   padding: '8px 10px',
-  border: '1px solid #E5E7EB',
+  border: '1px solid var(--crav-cream-line)',
   borderRadius: 10,
   background: '#fff',
 };

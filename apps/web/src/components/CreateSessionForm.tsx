@@ -127,11 +127,11 @@ export function CreateSessionForm() {
         <h2>Scan the receipt</h2>
         <div
           style={{
-            border: '2px dashed #CBD5E1',
+            border: '2px dashed var(--crav-cream-line)',
             borderRadius: 16,
             padding: 32,
             textAlign: 'center',
-            background: '#F8FAFC',
+            background: '#FBF1DC',
             maxWidth: 460,
           }}
         >
@@ -147,7 +147,7 @@ export function CreateSessionForm() {
           )}
 
           {phase === 'scanning' ? (
-            <p style={{ marginTop: 16, fontWeight: 600, color: '#2563EB' }}>
+            <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--crav-red)' }}>
               Reading your receipt…
             </p>
           ) : (
@@ -170,7 +170,7 @@ export function CreateSessionForm() {
                   marginTop: 8,
                   padding: '12px 24px',
                   fontWeight: 700,
-                  background: '#2563EB',
+                  background: 'var(--crav-red)',
                   color: '#fff',
                   border: 'none',
                   borderRadius: 10,
@@ -186,7 +186,7 @@ export function CreateSessionForm() {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#2563EB',
+                    color: 'var(--crav-red)',
                     textDecoration: 'underline',
                     cursor: 'pointer',
                     fontSize: 14,
@@ -289,7 +289,7 @@ export function CreateSessionForm() {
         type="button"
         onClick={() => void submit()}
         disabled={submitting}
-        style={{ padding: '10px 20px', fontWeight: 600, background: '#2563EB', color: '#fff', borderRadius: 8 }}
+        style={{ padding: '10px 20px', fontWeight: 600, background: 'var(--crav-red)', color: '#fff', borderRadius: 8 }}
       >
         {submitting ? 'Creating…' : 'Create session'}
       </button>

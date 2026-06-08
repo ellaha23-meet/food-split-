@@ -21,7 +21,7 @@ export default async function HostPage({ params }: PageProps) {
 
   if (!session) {
     return (
-      <main style={{ fontFamily: 'system-ui', padding: '2rem' }}>
+      <main style={{ fontFamily: 'var(--font-body)', padding: '2rem' }}>
         <h1>Tally</h1>
         <p style={{ color: 'crimson' }}>Session not found.</p>
       </main>
@@ -29,7 +29,7 @@ export default async function HostPage({ params }: PageProps) {
   }
 
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
+    <main style={{ fontFamily: 'var(--font-body)', padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
       <h1>Tally — host</h1>
       <ShareLink joinCode={session.join_code} />
       <hr style={{ margin: '20px 0' }} />
