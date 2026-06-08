@@ -15,18 +15,16 @@
  * never shows a broken image while assets are still being added.
  */
 
-const TOP_COLOR = '#fb2a1b'; // --crav-red, top band
-const BOTTOM_COLOR = '#ecdcbd'; // --crav-cream, bottom band (matches page canvas)
+const TOP_COLOR = '#ecdcbd'; // --crav-cream, top band (matches page canvas)
+const BOTTOM_COLOR = '#fb2a1b'; // --crav-red, bottom band — red rises up into the cream
 
 // Floating food cutouts. `src` points at /food/<file> in the public dir.
 // Positions are kept toward the edges so they frame the content rather than
 // sit under the readable middle.
 const FOOD = [
   { src: '/food/burger.png', top: '10%', left: '1%', size: 200, rotate: -12 },
-  { src: '/food/fries.png', top: '13%', right: '9%', size: 95, rotate: 18 },
   { src: '/food/milkshake.png', top: '30%', right: '1%', size: 135, rotate: -6 },
   { src: '/food/spaghetti.png', top: '57%', left: '3%', size: 110, rotate: 9 },
-  { src: '/food/fries.png', bottom: '4%', left: '10%', size: 180, rotate: -8 },
   { src: '/food/burger.png', bottom: '15%', right: '27%', size: 80, rotate: 15 },
   { src: '/food/spaghetti.png', bottom: '6%', right: '2%', size: 190, rotate: -15 },
 ];
