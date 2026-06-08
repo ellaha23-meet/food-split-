@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "npm install 2>&1 | tail -5 && echo '--- install done ---'"
+      }
+    ]
+  }
+}
