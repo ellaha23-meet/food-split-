@@ -1,19 +1,15 @@
 # Food cutout images
 
-Drop transparent **PNG** cutouts here. They render as floating decorations
-behind the UI (see `src/components/BackgroundDecor.tsx`).
+Transparent **PNG** cutouts rendered as floating decorations behind the UI
+(see `src/components/BackgroundDecor.tsx`). They have no background, so they
+"float" over the two-colour wave.
 
-Expected filenames (any that are missing are simply skipped):
+Current assets:
 
-- `burger.png`   — a burger cutout
-- `fries.png`    — fries
-- `lettuce.png`  — lettuce leaf
-- `tomato.png`   — tomato (half/slice)
-- `cheese.png`   — cheese slice
-- `cucumber.png` — cucumber/pickle slice
-- `drink.png`    — drink / soda cup
-- `chili.png`    — chili pepper
+- `burger.png`    — cheeseburger
+- `fries.png`     — fries
+- `spaghetti.png` — plate of spaghetti
+- `milkshake.png` — milkshake
 
-Use cutouts with a transparent background for the best effect. To add, move,
-resize, or rotate an item, edit the `FOOD` array in
-`src/components/BackgroundDecor.tsx`.
+To add, move, resize, or rotate an item, edit the `FOOD` array in
+`src/components/BackgroundDecor.tsx`. New cutouts should be transparent PNGs.

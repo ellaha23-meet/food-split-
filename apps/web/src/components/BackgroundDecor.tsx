@@ -22,14 +22,12 @@ const BOTTOM_COLOR = '#F2E4CC'; // warm cream, bottom band
 // Positions are kept toward the edges so they frame the content rather than
 // sit under the readable middle.
 const FOOD = [
-  { src: '/food/burger.png', top: '5%', left: '3%', size: 150, rotate: -10 },
-  { src: '/food/fries.png', top: '12%', right: '4%', size: 130, rotate: 12 },
-  { src: '/food/lettuce.png', top: '44%', left: '2%', size: 120, rotate: -8 },
-  { src: '/food/tomato.png', top: '38%', right: '3%', size: 110, rotate: 14 },
-  { src: '/food/cheese.png', bottom: '22%', left: '5%', size: 115, rotate: 10 },
-  { src: '/food/cucumber.png', bottom: '12%', right: '6%', size: 105, rotate: -14 },
-  { src: '/food/drink.png', bottom: '5%', left: '11%', size: 120, rotate: 6 },
-  { src: '/food/chili.png', top: '68%', right: '11%', size: 95, rotate: -10 },
+  { src: '/food/burger.png', top: '4%', left: '2%', size: 150, rotate: -8 },
+  { src: '/food/fries.png', top: '9%', right: '3%', size: 160, rotate: 10 },
+  { src: '/food/spaghetti.png', top: '45%', left: '1%', size: 160, rotate: -6 },
+  { src: '/food/milkshake.png', top: '40%', right: '2%', size: 95, rotate: 8 },
+  { src: '/food/fries.png', bottom: '6%', left: '6%', size: 140, rotate: 14 },
+  { src: '/food/spaghetti.png', bottom: '9%', right: '5%', size: 150, rotate: -10 },
 ];
 
 export function BackgroundDecor() {
@@ -78,10 +76,10 @@ export function BackgroundDecor() {
       </svg>
 
       {/* Floating food cutouts */}
-      {FOOD.map((f) => (
+      {FOOD.map((f, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          key={f.src}
+          key={i}
           src={f.src}
           alt=""
           // Hide gracefully if the asset hasn't been uploaded yet.
