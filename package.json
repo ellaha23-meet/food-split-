@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "(cd apps/web && tsc --noEmit) && (cd packages/reconcile && tsc --noEmit)",
+    "typecheck": "(cd packages/reconcile && npm run build) && (cd apps/web && tsc --noEmit) && (cd packages/reconcile && tsc --noEmit)",
     "lint": "(cd apps/web && npx next lint) && (cd packages/reconcile && npx eslint src)",
     "test": "(cd apps/web && npx vitest run) && (cd packages/reconcile && npx vitest run)",
     "build": "(cd packages/reconcile && npm run build) && (cd apps/web && npx next build)",
