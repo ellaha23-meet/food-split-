@@ -124,26 +124,35 @@ export function CreateSessionForm() {
   if (phase !== 'review') {
     return (
       <section style={{ marginTop: 24 }}>
-        <h2 className="section-title">Scan the receipt</h2>
-        <div className="dropzone container--narrow" style={{ marginTop: 8 }}>
+        <h2>Scan the receipt</h2>
+        <div
+          style={{
+            border: '2px dashed var(--crav-cream-line)',
+            borderRadius: 16,
+            padding: 32,
+            textAlign: 'center',
+            background: '#FBF1DC',
+            maxWidth: 460,
+          }}
+        >
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={photoUrl}
               alt="Receipt"
-              style={{ maxWidth: '100%', maxHeight: 260, borderRadius: 12, objectFit: 'contain' }}
+              style={{ maxWidth: '100%', maxHeight: 260, borderRadius: 10, objectFit: 'contain' }}
             />
           ) : (
-            <div className="dropzone__icon">📷</div>
+            <div style={{ fontSize: 56, lineHeight: 1 }}>📷</div>
           )}
 
           {phase === 'scanning' ? (
-            <p style={{ marginTop: 16, fontWeight: 800, color: 'var(--red)' }}>
+            <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--crav-red)' }}>
               Reading your receipt…
             </p>
           ) : (
             <>
-              <p className="muted" style={{ marginTop: 12, fontWeight: 700 }}>
+              <p style={{ marginTop: 12, color: '#475569' }}>
                 Take a photo of your receipt and we&apos;ll turn it into a tappable bill.
               </p>
               <input
@@ -157,13 +166,32 @@ export function CreateSessionForm() {
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                className="btn btn--primary btn--lg"
-                style={{ marginTop: 16 }}
+                style={{
+                  marginTop: 8,
+                  padding: '12px 24px',
+                  fontWeight: 700,
+                  background: 'var(--crav-red)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 10,
+                  cursor: 'pointer',
+                }}
               >
                 Take a photo
               </button>
               <div style={{ marginTop: 14 }}>
-                <button type="button" onClick={enterManually} className="btn-link">
+                <button
+                  type="button"
+                  onClick={enterManually}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--crav-red)',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                  }}
+                >
                   or enter items manually
                 </button>
               </div>
@@ -177,95 +205,91 @@ export function CreateSessionForm() {
   // ── Review ──────────────────────────────────────────────────────────────
   return (
     <section style={{ marginTop: 24 }}>
-      <h2 className="section-title">Review the bill</h2>
-      <p className="muted" style={{ marginTop: 0, fontWeight: 700 }}>
+      <h2>Review the bill</h2>
+      <p style={{ color: '#64748B', marginTop: -8 }}>
         {photoUrl ? 'Scanned from your photo — tap any field to fix it.' : 'Enter each item below.'}
       </p>
-      <div className="card card--flat" style={{ marginTop: 12 }}>
-        <table className="edit-table">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th style={{ width: 60 }}>Qty</th>
-              <th style={{ width: 110 }}>Unit ₪</th>
-              <th />
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ textAlign: 'left', color: '#666', fontSize: 13 }}>
+            <th>Item</th>
+            <th style={{ width: 60 }}>Qty</th>
+            <th style={{ width: 110 }}>Unit ₪</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((it, i) => (
+            <tr key={i}>
+              <td>
+                <input
+                  value={it.name}
+                  onChange={(e) => update(i, { name: e.target.value })}
+                  placeholder="Margherita pizza"
+                  style={{ width: '100%', padding: 6, boxSizing: 'border-box' }}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  min="1"
+                  value={it.qty}
+                  onChange={(e) => update(i, { qty: e.target.value })}
+                  style={{ width: '100%', padding: 6, boxSizing: 'border-box' }}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={it.price}
+                  onChange={(e) => update(i, { price: e.target.value })}
+                  placeholder="12.00"
+                  style={{ width: '100%', padding: 6, boxSizing: 'border-box' }}
+                />
+              </td>
+              <td>
+                <button type="button" onClick={() => removeRow(i)} aria-label="Remove">
+                  ✕
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {items.map((it, i) => (
-              <tr key={i}>
-                <td>
-                  <input
-                    className="field"
-                    value={it.name}
-                    onChange={(e) => update(i, { name: e.target.value })}
-                    placeholder="Margherita pizza"
-                  />
-                </td>
-                <td>
-                  <input
-                    className="field"
-                    type="number"
-                    min="1"
-                    value={it.qty}
-                    onChange={(e) => update(i, { qty: e.target.value })}
-                  />
-                </td>
-                <td>
-                  <input
-                    className="field"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={it.price}
-                    onChange={(e) => update(i, { price: e.target.value })}
-                    placeholder="12.00"
-                  />
-                </td>
-                <td>
-                  <button type="button" className="icon-btn" onClick={() => removeRow(i)} aria-label="Remove">
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <button type="button" className="btn btn--sm" onClick={addRow} style={{ marginTop: 8 }}>
-          + Add item
-        </button>
+          ))}
+        </tbody>
+      </table>
+      <button type="button" onClick={addRow} style={{ marginTop: 8 }}>
+        + Add item
+      </button>
 
-        <div style={{ marginTop: 16 }}>
-          <label className="row" style={{ gap: 8 }}>
-            <span className="label">Tax ₪</span>
-            <input
-              className="field"
-              type="number"
-              step="0.01"
-              min="0"
-              value={tax}
-              onChange={(e) => setTax(e.target.value)}
-              style={{ width: 110 }}
-            />
-          </label>
-        </div>
+      <div style={{ display: 'flex', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+        <label>
+          Tax ₪
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={tax}
+            onChange={(e) => setTax(e.target.value)}
+            style={{ width: 90, padding: 6, marginLeft: 6 }}
+          />
+        </label>
       </div>
 
-      <p style={{ marginTop: 16, fontSize: 16, fontWeight: 700 }}>
+      <p style={{ marginTop: 12, fontSize: 15 }}>
         Subtotal {fmt(subtotalCents)} · Receipt total <strong>{fmt(grandTotal)}</strong>
       </p>
-      <p className="muted" style={{ marginTop: -6, fontSize: 14, fontWeight: 700 }}>
+      <p style={{ marginTop: -6, fontSize: 13, color: '#64748B' }}>
         Each diner adds their own tip when they pick what they had.
       </p>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p style={{ color: 'crimson' }}>{error}</p>}
 
       <button
         type="button"
         onClick={() => void submit()}
         disabled={submitting}
-        className="btn btn--primary btn--lg"
-        style={{ marginTop: 8 }}
+        style={{ padding: '10px 20px', fontWeight: 600, background: 'var(--crav-red)', color: '#fff', borderRadius: 8 }}
       >
         {submitting ? 'Creating…' : 'Create session'}
       </button>

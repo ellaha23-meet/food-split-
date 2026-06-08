@@ -29,23 +29,18 @@ export default async function JoinPage({ params }: PageProps) {
 
   if (errorMessage || !sessionId) {
     return (
-      <main className="page">
-        <div className="container container--narrow">
-          <h1 className="brand brand--lg">Tally</h1>
-          <p className="error">{errorMessage}</p>
-        </div>
+      <main style={{ padding: '2rem', fontFamily: 'var(--font-body)' }}>
+        <h1>Tally</h1>
+        <p style={{ color: 'red' }}>{errorMessage}</p>
       </main>
     );
   }
 
   return (
-    <main className="page">
-      <div className="container container--narrow">
-        <span className="sticker" style={{ marginBottom: 8, display: 'inline-block' }}>You&apos;re in</span>
-        <h1 className="brand brand--xl">Tally</h1>
-        <p className="tagline" style={{ marginBottom: 20 }}>Joining: <strong>{sessionName}</strong></p>
-        <GuestJoinForm sessionId={sessionId} />
-      </div>
+    <main style={{ padding: '2rem', fontFamily: 'var(--font-body)' }}>
+      <h1>Tally</h1>
+      <p>Joining: <strong>{sessionName}</strong></p>
+      <GuestJoinForm sessionId={sessionId} />
     </main>
   );
 }
