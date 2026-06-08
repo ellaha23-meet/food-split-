@@ -203,15 +203,15 @@ export function Prototype() {
     return (
       <Shell>
         <h2>Review the bill</h2>
-        <p style={{ color: 'var(--crav-ink)', marginTop: -8 }}>
+        <p style={{ color: '#fff', marginTop: -8 }}>
           {photoUrl ? 'Scanned from your photo — tap any field to fix it.' : 'Enter each item below.'}
         </p>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ textAlign: 'left', color: 'var(--crav-ink)', fontSize: 13 }}>
-              <th>Item</th>
-              <th style={{ width: 60 }}>Qty</th>
-              <th style={{ width: 110 }}>Unit ₪</th>
+            <tr style={{ textAlign: 'left', color: '#fff', fontSize: 13 }}>
+              <th style={{ color: '#fff' }}>Item</th>
+              <th style={{ width: 60, color: '#fff' }}>Qty</th>
+              <th style={{ width: 110, color: '#fff' }}>Unit ₪</th>
               <th />
             </tr>
           </thead>
@@ -270,7 +270,7 @@ export function Prototype() {
         </button>
 
         <div style={{ marginTop: 16 }}>
-          <label>
+          <label style={{ color: '#fff' }}>
             Tax ₪
             <input
               type="number"
@@ -283,10 +283,10 @@ export function Prototype() {
           </label>
         </div>
 
-        <p style={{ marginTop: 12, fontSize: 15 }}>
+        <p style={{ marginTop: 12, fontSize: 15, color: '#fff' }}>
           Subtotal {fmt(subtotal)} · Receipt total <strong>{fmt(subtotal + taxCents)}</strong>
         </p>
-        <p style={{ marginTop: -6, fontSize: 13, color: 'var(--crav-ink)' }}>
+        <p style={{ marginTop: -6, fontSize: 13, color: '#fff' }}>
           Each diner adds their own tip when they pick what they had.
         </p>
 
@@ -331,7 +331,7 @@ export function Prototype() {
           ← Back to choosing
         </button>
         <h2 style={{ marginBottom: 4 }}>Review before paying</h2>
-        <p style={{ color: 'var(--crav-ink)', marginTop: 0 }}>
+        <p style={{ color: '#fff', marginTop: 0 }}>
           Check who had what, then settle up with Bit.
         </p>
 
@@ -360,7 +360,7 @@ export function Prototype() {
         <section style={{ marginTop: 16 }}>
           <h3 style={{ marginBottom: 6 }}>🍽️ Shared meals</h3>
           {sharedItems.length === 0 ? (
-            <p style={{ color: 'var(--crav-ink)', margin: 0 }}>No shared meals.</p>
+            <p style={{ color: '#fff', margin: 0 }}>No shared meals.</p>
           ) : (
             <ul style={mealList}>
               {sharedItems.map((it) => {
@@ -392,7 +392,7 @@ export function Prototype() {
         <section style={{ marginTop: 16 }}>
           <h3 style={{ marginBottom: 6 }}>👤 Personal meals</h3>
           {personalItems.length === 0 ? (
-            <p style={{ color: 'var(--crav-ink)', margin: 0 }}>No personal meals.</p>
+            <p style={{ color: '#fff', margin: 0 }}>No personal meals.</p>
           ) : (
             <ul style={mealList}>
               {personalItems.map((it) => {
@@ -511,7 +511,7 @@ export function Prototype() {
   return (
     <Shell>
       <h2 style={{ marginBottom: 4 }}>Who had what?</h2>
-      <p style={{ color: 'var(--crav-ink)', marginTop: 0 }}>
+      <p style={{ color: '#fff', marginTop: 0 }}>
         Pick a diner, then tap the items they had. Shared items split automatically.
       </p>
 
@@ -526,7 +526,7 @@ export function Prototype() {
       {!activeDiner ? (
         <p style={{ color: '#DC2626', fontWeight: 600 }}>Add a diner to start tapping items.</p>
       ) : (
-        <p style={{ fontSize: 14, color: 'var(--crav-ink)' }}>
+        <p style={{ fontSize: 14, color: '#fff' }}>
           Tapping as{' '}
           <strong style={{ color: activeDiner.color }}>{activeDiner.name}</strong>
         </p>
@@ -609,15 +609,15 @@ export function Prototype() {
 
       {/* Totals */}
       <section style={{ marginTop: 16 }}>
-        <strong>Live totals</strong>
+        <strong style={{ color: '#fff' }}>Live totals</strong>
         <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: 6, fontSize: 14 }}>
           <thead>
-            <tr style={{ textAlign: 'right', color: 'var(--crav-ink)' }}>
-              <th style={{ textAlign: 'left' }}>Diner</th>
-              <th>Items</th>
-              <th>Tax</th>
-              <th>Tip</th>
-              <th>Total</th>
+            <tr style={{ textAlign: 'right', color: '#fff' }}>
+              <th style={{ textAlign: 'left', color: '#fff' }}>Diner</th>
+              <th style={{ color: '#fff' }}>Items</th>
+              <th style={{ color: '#fff' }}>Tax</th>
+              <th style={{ color: '#fff' }}>Tip</th>
+              <th style={{ color: '#fff' }}>Total</th>
               <th />
             </tr>
           </thead>
@@ -627,7 +627,7 @@ export function Prototype() {
               return (
                 <tr
                   key={d.id}
-                  style={{ textAlign: 'right', fontWeight: d.id === activeId ? 700 : 400 }}
+                  style={{ textAlign: 'right', fontWeight: d.id === activeId ? 700 : 400, color: '#fff' }}
                 >
                   <td style={{ textAlign: 'left' }}>
                     <span
@@ -1025,7 +1025,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <h1 style={{ marginTop: 12, marginBottom: 0, fontSize: 'clamp(3rem, 8vw, 5rem)' }}>
         Split it.
       </h1>
-      <p style={{ color: 'var(--crav-ink-soft)', marginTop: 6, fontWeight: 700, fontSize: 17 }}>
+      <p style={{ color: '#fff', marginTop: 6, fontWeight: 700, fontSize: 17 }}>
         Snap the receipt, tap what you had, add your tip, and pay with Bit.
       </p>
       {children}
