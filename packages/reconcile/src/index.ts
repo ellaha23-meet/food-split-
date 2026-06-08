@@ -3,3 +3,4 @@ export * from './money.js';
 export * from './shares.js';
 export * from './allocate.js';
 export * from './round.js';
+export * from './compute.js';
