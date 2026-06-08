@@ -40,7 +40,7 @@ export default async function JoinPage({ params }: PageProps) {
     <main style={{ padding: '2rem', fontFamily: 'system-ui' }}>
       <h1>Tally</h1>
       <p>Joining: <strong>{sessionName}</strong></p>
-      <GuestJoinForm sessionId={sessionId} joinCode={code} />
+      <GuestJoinForm sessionId={sessionId} />
     </main>
   );
 }

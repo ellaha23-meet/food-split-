@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { LiveSession } from '@/components/LiveSession';
 
 const COLORS = [
   '#EF4444', '#F97316', '#EAB308', '#22C55E',
@@ -15,10 +16,9 @@ const COLORS = [
 
 interface GuestJoinFormProps {
   sessionId: string;
-  joinCode: string;
 }
 
-export function GuestJoinForm({ sessionId, joinCode }: GuestJoinFormProps) {
+export function GuestJoinForm({ sessionId }: GuestJoinFormProps) {
   const [name, setName] = useState('');
   const [color, setColor] = useState(COLORS[0] ?? '#EF4444');
   const [submitting, setSubmitting] = useState(false);
@@ -53,17 +53,7 @@ export function GuestJoinForm({ sessionId, joinCode }: GuestJoinFormProps) {
   }
 
   if (participantId) {
-    return (
-      <div>
-        <p>
-          You joined as <strong>{name}</strong>!
-        </p>
-        <p>
-          Session: <code>{joinCode}</code> — Participant ID: <code>{participantId}</code>
-        </p>
-        <p><em>(Claiming UI comes in P3.)</em></p>
-      </div>
-    );
+    return <LiveSession sessionId={sessionId} participantId={participantId} />;
   }
 
   return (

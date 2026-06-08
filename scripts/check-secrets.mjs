@@ -45,14 +45,16 @@ function walkDir(dir) {
   return files;
 }
 
-// Only scan client-side chunks (not server chunks)
+// Only scan client-side chunks — i.e. assets actually served to the browser.
+// These live under .next/static/. Everything under .next/server/ runs only on
+// the server and legitimately references server-only env var names, so scanning
+// it would produce false positives (the service-role key name *should* appear
+// in server bundles). G6 is about what ships to the client.
 function isClientChunk(path) {
-  return (
-    path.includes('/_next/static/') ||
-    path.includes('.next/static/') ||
-    path.includes('chunks/') ||
-    path.includes('pages/')
-  );
+  if (path.includes('/.next/server/') || path.includes('.next\\server\\')) {
+    return false;
+  }
+  return path.includes('/.next/static/') || path.includes('/_next/static/');
 }
 
 const clientFiles = walkDir(BUILD_DIR).filter(isClientChunk);

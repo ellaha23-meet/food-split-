@@ -4,8 +4,11 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '';
-const serviceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '';
+// Placeholder fallbacks keep module load (and the production build's page-data
+// collection) from throwing when env vars are absent. Real values are injected
+// at runtime; with the placeholder, any actual request fails loudly instead.
+const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? 'http://localhost:54321';
+const serviceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? 'placeholder-service-role-key';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const supabaseAdmin = createClient<any>(supabaseUrl, serviceRoleKey, {
