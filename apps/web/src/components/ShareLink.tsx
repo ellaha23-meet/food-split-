@@ -32,33 +32,40 @@ export function ShareLink({ joinCode }: { joinCode: string }) {
 
   return (
     <section
+      className="card"
       style={{
-        background: '#F9FAFB',
-        borderRadius: 10,
-        padding: 16,
         display: 'flex',
-        gap: 20,
+        gap: 24,
         alignItems: 'center',
         flexWrap: 'wrap',
       }}
     >
-      <div>
-        <div style={{ fontSize: 13, color: '#666' }}>Join code</div>
-        <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: 2 }}>{joinCode}</div>
-        <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div style={{ flex: 1, minWidth: 240 }}>
+        <div className="label">Join code</div>
+        <div className="brand brand--lg" style={{ letterSpacing: 4 }}>{joinCode}</div>
+        <div className="row" style={{ marginTop: 12, gap: 8 }}>
           <input
+            className="field"
             readOnly
             value={url}
-            style={{ width: 280, padding: 6, fontSize: 13 }}
+            style={{ flex: 1, minWidth: 200 }}
             onFocus={(e) => e.currentTarget.select()}
           />
-          <button type="button" onClick={() => void copy()}>
+          <button type="button" className="btn btn--sm btn--dark" onClick={() => void copy()}>
             {copied ? 'Copied!' : 'Copy link'}
           </button>
         </div>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {qrSrc && <img src={qrSrc} alt={`QR code for ${joinCode}`} width={180} height={180} />}
+      {qrSrc && (
+        <img
+          src={qrSrc}
+          alt={`QR code for ${joinCode}`}
+          width={180}
+          height={180}
+          style={{ borderRadius: 16, border: '3px solid var(--ink)', background: '#fff' }}
+        />
+      )}
     </section>
   );
 }

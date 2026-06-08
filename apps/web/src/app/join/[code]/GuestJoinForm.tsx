@@ -57,37 +57,39 @@ export function GuestJoinForm({ sessionId }: GuestJoinFormProps) {
   }
 
   return (
-    <form onSubmit={(e) => { void handleSubmit(e); }} style={{ maxWidth: '320px' }}>
+    <form onSubmit={(e) => { void handleSubmit(e); }} className="card" style={{ maxWidth: 420 }}>
       <div style={{ marginBottom: '1rem' }}>
-        <label htmlFor="name" style={{ display: 'block', marginBottom: '0.25rem' }}>
+        <label htmlFor="name" className="label" style={{ display: 'block', marginBottom: '0.4rem' }}>
           Your name
         </label>
         <input
           id="name"
+          className="field"
           type="text"
           value={name}
           onChange={(e) => { setName(e.target.value); }}
           placeholder="e.g. Alice"
           required
-          style={{ width: '100%', padding: '0.5rem', boxSizing: 'border-box' }}
         />
       </div>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <p style={{ marginBottom: '0.25rem' }}>Pick a color</p>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: '1.25rem' }}>
+        <p className="label" style={{ marginBottom: '0.4rem' }}>Pick a color</p>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
           {COLORS.map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => { setColor(c); }}
               style={{
-                width: '2rem',
-                height: '2rem',
+                width: '2.25rem',
+                height: '2.25rem',
                 borderRadius: '50%',
                 background: c,
-                border: color === c ? '3px solid #000' : '2px solid transparent',
+                border: color === c ? '4px solid var(--ink)' : '2px solid rgba(0,0,0,0.12)',
                 cursor: 'pointer',
+                transform: color === c ? 'scale(1.1)' : 'none',
+                transition: 'transform 0.1s ease',
               }}
               aria-label={`Color ${c}`}
             />
@@ -95,12 +97,12 @@ export function GuestJoinForm({ sessionId }: GuestJoinFormProps) {
         </div>
       </div>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
 
       <button
         type="submit"
         disabled={submitting || !name.trim()}
-        style={{ padding: '0.5rem 1.5rem' }}
+        className="btn btn--primary btn--lg btn--block"
       >
         {submitting ? 'Joining…' : 'Join session'}
       </button>
