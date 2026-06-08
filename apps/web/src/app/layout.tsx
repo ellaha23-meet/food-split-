@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { BackgroundDecor } from '@/components/BackgroundDecor';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <BackgroundDecor />
         <div className="crav-shell">
           <header className="crav-header">
             <Link href="/" className="crav-logo">
