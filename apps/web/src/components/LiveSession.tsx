@@ -18,6 +18,7 @@
 import { useMemo, useState } from 'react';
 import { useSessionState } from '@/lib/useSessionState';
 import { fmt } from '@/lib/format';
+import { BitModal } from '@/components/ui';
 
 interface LiveSessionProps {
   sessionId: string;
@@ -44,8 +45,8 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
     return map;
   }, [state?.claims]);
 
-  if (error && !state) return <p style={{ color: 'crimson' }}>Error: {error}</p>;
-  if (!state) return <p>Loading session…</p>;
+  if (error && !state) return <p className="error">Error: {error}</p>;
+  if (!state) return <p style={{ fontWeight: 700 }}>Loading session…</p>;
 
   const { session, hostName, lineItems, participants, totals, settlements } = state;
   const locked = session.status !== 'open';
@@ -100,35 +101,26 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
     : undefined;
 
   return (
-    <div style={{ fontFamily: 'system-ui', maxWidth: 760 }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <h2 style={{ margin: 0 }}>Session {session.join_code}</h2>
-        <span style={{ fontSize: 13, color: '#666' }}>status: {session.status}</span>
+    <div>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <h2 className="section-title" style={{ margin: 0 }}>Session {session.join_code}</h2>
+        <span className={'badge ' + (locked ? 'badge--paid' : 'badge--pending')}>status: {session.status}</span>
       </header>
 
-      {notice && (
-        <p style={{ background: '#FEF3C7', padding: '8px 12px', borderRadius: 6 }}>{notice}</p>
-      )}
+      {notice && <p className="notice" style={{ marginTop: 12 }}>{notice}</p>}
 
       {/* Presence board (P3.3) */}
-      <section style={{ margin: '12px 0' }}>
-        <strong>At the table</strong>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
-          {participants.length === 0 && <em style={{ color: '#888' }}>No one yet</em>}
+      <section style={{ margin: '16px 0' }}>
+        <h3 className="section-title">At the table</h3>
+        <div className="row" style={{ marginTop: 6 }}>
+          {participants.length === 0 && <em className="muted">No one yet</em>}
           {participants.map((p) => (
             <span
               key={p.id}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '4px 10px',
-                borderRadius: 999,
-                background: '#FBF1DC',
-                fontWeight: p.id === participantId ? 700 : 400,
-              }}
+              className={'chip chip--static' + (p.id === participantId ? ' is-you' : '')}
+              style={{ cursor: 'default', fontWeight: p.id === participantId ? 900 : 800 }}
             >
-              <span style={{ width: 12, height: 12, borderRadius: 999, background: p.color }} />
+              <span className="dot" style={{ background: p.color }} />
               {p.display_name}
               {p.id === participantId && ' (you)'}
             </span>
@@ -138,54 +130,37 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
 
       {/* Tappable grid (P3.1/3.2) */}
       <section>
-        <strong>Items — tap what you had</strong>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-            gap: 10,
-            marginTop: 8,
-          }}
-        >
+        <h3 className="section-title">Items — tap what you had</h3>
+        <div className="item-grid">
           {lineItems.map((item) => {
             const claimers = claimsByItem.get(item.id) ?? [];
             const mineItem = viewerClaims(item.id);
             const unclaimed = claimers.length === 0 && !mineItem;
+            const cls =
+              'item-card' + (mineItem ? ' item-card--mine' : unclaimed ? ' item-card--unclaimed' : '');
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => void toggleClaim(item.id)}
                 disabled={!participantId || locked}
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  textTransform: 'none',
-                  letterSpacing: 'normal',
-                  color: 'var(--crav-ink)',
-                  textAlign: 'left',
-                  padding: 12,
-                  borderRadius: 10,
-                  boxShadow: '3px 3px 0 var(--crav-ink)',
-                  cursor: participantId && !locked ? 'pointer' : 'default',
-                  border: mineItem ? '2px solid var(--crav-red)' : '2px solid var(--crav-ink)',
-                  background: unclaimed ? '#FEE2E2' : mineItem ? '#FFF3E2' : '#fff',
-                  outline: unclaimed ? '2px dashed #DC2626' : 'none',
-                }}
+                className={cls}
               >
-                <div style={{ fontWeight: 600 }}>{item.name}</div>
-                <div style={{ color: '#374151' }}>{fmt(item.total_price_cents)}</div>
-                <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap', minHeight: 14 }}>
+                <div className="item-name">{item.name}</div>
+                <div className="item-price">{fmt(item.total_price_cents)}</div>
+                <div style={{ marginTop: 8, display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center', minHeight: 16 }}>
                   {claimers.map((pid) => (
                     <span
                       key={pid}
+                      className="dot"
                       title={nameOf(pid)}
-                      style={{ width: 14, height: 14, borderRadius: 999, background: colorOf(pid) }}
+                      style={{ background: colorOf(pid) }}
                     />
                   ))}
                   {claimers.length > 1 && (
-                    <span style={{ fontSize: 11, color: 'var(--crav-red)' }}>split ×{claimers.length}</span>
+                    <span className="tag tag--split">split ×{claimers.length}</span>
                   )}
-                  {unclaimed && <span style={{ fontSize: 11, color: '#DC2626' }}>UNCLAIMED</span>}
+                  {unclaimed && <span className="tag tag--unclaimed">UNCLAIMED</span>}
                 </div>
               </button>
             );
@@ -194,7 +169,7 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
       </section>
 
       {totals.unclaimedCents > 0 && (
-        <p style={{ color: '#DC2626', fontWeight: 600, marginTop: 10 }}>
+        <p className="error" style={{ marginTop: 12 }}>
           {fmt(totals.unclaimedCents)} still unclaimed — must be resolved before settling.
         </p>
       )}
@@ -216,43 +191,42 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
       )}
 
       {/* Live totals (P5.2) */}
-      <section style={{ marginTop: 16 }}>
-        <strong>Live totals</strong>
-        <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: 6, fontSize: 14 }}>
-          <thead>
-            <tr style={{ textAlign: 'right', color: '#666' }}>
-              <th style={{ textAlign: 'left' }}>Diner</th>
-              <th>Items</th>
-              <th>Tax</th>
-              <th>Tip</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {totals.perParticipant.map((p) => (
-              <tr
-                key={p.participantId}
-                style={{
-                  textAlign: 'right',
-                  fontWeight: p.participantId === participantId ? 700 : 400,
-                }}
-              >
-                <td style={{ textAlign: 'left' }}>{nameOf(p.participantId)}</td>
-                <td>{fmt(p.claimedSubtotalCents)}</td>
-                <td>{fmt(p.taxCents)}</td>
-                <td>{fmt(p.tipCents + p.serviceChargeCents)}</td>
-                <td>{fmt(p.totalCents)}</td>
+      <section style={{ marginTop: 20 }}>
+        <h3 className="section-title">Live totals</h3>
+        <div className="card card--flat" style={{ padding: 16 }}>
+          <table className="totals">
+            <thead>
+              <tr>
+                <th>Diner</th>
+                <th>Items</th>
+                <th>Tax</th>
+                <th>Tip</th>
+                <th>Total</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr style={{ textAlign: 'right', borderTop: '2px solid #111', fontWeight: 700 }}>
-              <td style={{ textAlign: 'left' }}>Grand total</td>
-              <td colSpan={3} />
-              <td>{fmt(totals.grandTotalCents)}</td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {totals.perParticipant.map((p) => (
+                <tr
+                  key={p.participantId}
+                  className={p.participantId === participantId ? 'is-you' : undefined}
+                >
+                  <td>{nameOf(p.participantId)}</td>
+                  <td>{fmt(p.claimedSubtotalCents)}</td>
+                  <td>{fmt(p.taxCents)}</td>
+                  <td>{fmt(p.tipCents + p.serviceChargeCents)}</td>
+                  <td>{fmt(p.totalCents)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>Grand total</td>
+                <td colSpan={3} />
+                <td>{fmt(totals.grandTotalCents)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </section>
 
       {/* Close / settle (host) */}
@@ -325,22 +299,14 @@ function DinerPanel({
   }
 
   return (
-    <section
-      style={{
-        marginTop: 16,
-        padding: 16,
-        background: '#FBF1DC',
-        border: '1px solid var(--crav-yellow)',
-        borderRadius: 12,
-      }}
-    >
-      <strong>Your tip</strong>
-      <p style={{ margin: '4px 0 10px', fontSize: 13, color: '#475569' }}>
+    <section className="panel">
+      <h3 className="section-title">Your tip</h3>
+      <p className="muted" style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700 }}>
         Tip on your {fmt(subtotalCents)} of items — your call.
       </p>
 
       {!locked && (
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="row">
           {TIP_PERCENTS.map((pct) => {
             const active = pct === activePct;
             return (
@@ -349,22 +315,15 @@ function DinerPanel({
                 type="button"
                 disabled={saving}
                 onClick={() => void setTip(Math.round((subtotalCents * pct) / 100))}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 999,
-                  border: active ? '2px solid var(--crav-red)' : '1px solid var(--crav-cream-line)',
-                  background: active ? 'var(--crav-red)' : '#fff',
-                  color: active ? '#fff' : '#0F172A',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className={'chip' + (active ? ' chip--active' : '')}
               >
                 {pct === 0 ? 'No tip' : `${pct}%`}
               </button>
             );
           })}
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span className="row" style={{ gap: 4 }}>
             <input
+              className="field"
               type="number"
               step="0.01"
               min="0"
@@ -374,20 +333,20 @@ function DinerPanel({
               onBlur={() => {
                 if (custom !== '') void setTip(Math.round(parseFloat(custom || '0') * 100));
               }}
-              style={{ width: 80, padding: 6 }}
+              style={{ width: 90 }}
             />
-            <span style={{ fontSize: 13, color: '#475569' }}>₪</span>
+            <span className="muted" style={{ fontWeight: 700 }}>₪</span>
           </span>
         </div>
       )}
 
-      <p style={{ marginTop: 12, fontSize: 15 }}>
+      <p style={{ marginTop: 14, fontSize: 16, fontWeight: 700 }}>
         Items {fmt(subtotalCents)} · Tax {fmt(taxCents)} · Tip <strong>{fmt(tipCents)}</strong>
-        {' · '}You owe <strong style={{ fontSize: 17 }}>{fmt(totalCents)}</strong>
+        {' · '}You owe <strong className="amount" style={{ fontSize: 22 }}>{fmt(totalCents)}</strong>
       </p>
 
       {alreadyPaid ? (
-        <p style={{ marginTop: 8, color: '#047857', fontWeight: 700 }}>
+        <p style={{ marginTop: 8, color: 'var(--green)', fontWeight: 800 }}>
           ✓ Paid {fmt(totalCents)} to {hostName} with Bit
         </p>
       ) : (
@@ -395,17 +354,8 @@ function DinerPanel({
           type="button"
           disabled={totalCents <= 0}
           onClick={() => setShowBit(true)}
-          style={{
-            marginTop: 8,
-            padding: '12px 22px',
-            fontWeight: 800,
-            fontSize: 16,
-            color: '#062E2E',
-            background: totalCents > 0 ? '#00C2C7' : 'var(--crav-cream-line)',
-            border: 'none',
-            borderRadius: 12,
-            cursor: totalCents > 0 ? 'pointer' : 'not-allowed',
-          }}
+          className="btn btn--bit btn--lg"
+          style={{ marginTop: 8 }}
         >
           Pay {fmt(totalCents)} with Bit
         </button>
@@ -430,162 +380,6 @@ function DinerPanel({
   );
 }
 
-/**
- * Simulated Bit payment sheet. Bit (ביט) never actually moves money here — this
- * is a faithful-looking confirmation that resolves the diner's share locally.
- */
-function BitModal({
-  amountCents,
-  payeeName,
-  onClose,
-  onConfirm,
-}: {
-  amountCents: number;
-  payeeName: string;
-  onClose: () => void;
-  onConfirm: () => Promise<void>;
-}) {
-  const [phase, setPhase] = useState<'confirm' | 'processing' | 'done'>('confirm');
-
-  async function pay() {
-    setPhase('processing');
-    await new Promise((r) => setTimeout(r, 1300));
-    await onConfirm();
-    setPhase('done');
-  }
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(15,23,42,0.55)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16,
-        zIndex: 50,
-      }}
-      onClick={phase === 'processing' ? undefined : onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 340,
-          maxWidth: '100%',
-          borderRadius: 20,
-          overflow: 'hidden',
-          background: '#fff',
-          fontFamily: 'system-ui',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-        }}
-      >
-        {/* Bit header */}
-        <div
-          style={{
-            background: 'linear-gradient(135deg, #00C2C7, #00A0B4)',
-            color: '#062E2E',
-            padding: '18px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: -1 }}>bit</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>תשלום מהיר</span>
-        </div>
-
-        <div style={{ padding: 22, textAlign: 'center' }}>
-          {phase === 'done' ? (
-            <>
-              <div style={{ fontSize: 52 }}>✅</div>
-              <p style={{ fontWeight: 800, fontSize: 18, margin: '8px 0 2px' }}>Payment sent</p>
-              <p style={{ color: '#475569', margin: 0 }}>
-                {fmt(amountCents)} to {payeeName}
-              </p>
-              <button
-                type="button"
-                onClick={onClose}
-                style={{
-                  marginTop: 18,
-                  padding: '10px 22px',
-                  fontWeight: 700,
-                  border: 'none',
-                  borderRadius: 10,
-                  background: '#0F172A',
-                  color: '#fff',
-                  cursor: 'pointer',
-                }}
-              >
-                Done
-              </button>
-            </>
-          ) : (
-            <>
-              <p style={{ color: '#475569', margin: '0 0 4px' }}>Paying</p>
-              <div style={{ fontSize: 40, fontWeight: 900, color: '#0F172A' }}>
-                {fmt(amountCents)}
-              </div>
-              <p style={{ color: '#475569', margin: '6px 0 0' }}>
-                to <strong>{payeeName}</strong>
-              </p>
-              <div
-                style={{
-                  marginTop: 16,
-                  padding: '10px 12px',
-                  background: '#FBF1DC',
-                  borderRadius: 10,
-                  fontSize: 13,
-                  color: '#64748B',
-                }}
-              >
-                Linked: Visa •••• 4821
-              </div>
-
-              <button
-                type="button"
-                disabled={phase === 'processing'}
-                onClick={() => void pay()}
-                style={{
-                  marginTop: 18,
-                  width: '100%',
-                  padding: '14px',
-                  fontWeight: 800,
-                  fontSize: 16,
-                  color: '#062E2E',
-                  background: '#00C2C7',
-                  border: 'none',
-                  borderRadius: 12,
-                  cursor: phase === 'processing' ? 'default' : 'pointer',
-                }}
-              >
-                {phase === 'processing' ? 'Sending…' : 'Confirm payment'}
-              </button>
-              {phase !== 'processing' && (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  style={{
-                    marginTop: 10,
-                    background: 'none',
-                    border: 'none',
-                    color: '#64748B',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancel
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function CloseButton({ sessionId, onDone }: { sessionId: string; onDone: () => Promise<void> }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -607,16 +401,16 @@ function CloseButton({ sessionId, onDone }: { sessionId: string; onDone: () => P
   }
 
   return (
-    <div style={{ marginTop: 16 }}>
+    <div style={{ marginTop: 18 }}>
       <button
         type="button"
         onClick={() => void close()}
         disabled={busy}
-        style={{ padding: '10px 18px', fontWeight: 600, background: '#111', color: '#fff', borderRadius: 8 }}
+        className="btn btn--dark"
       >
         {busy ? 'Closing…' : 'Close & settle'}
       </button>
-      {msg && <p style={{ color: '#DC2626', marginTop: 8 }}>{msg}</p>}
+      {msg && <p className="error" style={{ marginTop: 8 }}>{msg}</p>}
     </div>
   );
 }
@@ -654,36 +448,27 @@ function SettlementBoard({
   }
 
   return (
-    <section style={{ marginTop: 20 }}>
-      <strong>Settlement — everyone pays {hostName} with Bit</strong>
+    <section style={{ marginTop: 24 }}>
+      <h3 className="section-title">Settlement — everyone pays {hostName} with Bit</h3>
       <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
         {settlements.map((s) => {
           const isMine = s.participant_id === viewerParticipantId;
           return (
             <li
               key={s.id}
+              className="row"
               style={{
-                display: 'flex',
                 gap: 12,
-                alignItems: 'center',
-                padding: '8px 0',
-                borderBottom: '1px solid #eee',
-                flexWrap: 'wrap',
+                padding: '12px 0',
+                borderBottom: '1px solid var(--line)',
               }}
             >
-              <span style={{ minWidth: 120, fontWeight: isMine ? 700 : 400 }}>
+              <span style={{ minWidth: 120, fontWeight: isMine ? 900 : 700 }}>
                 {nameOf(s.participant_id)}
                 {isMine && ' (you)'}
               </span>
-              <span style={{ minWidth: 80 }}>{fmt(s.amount_owed_cents)}</span>
-              <span
-                style={{
-                  padding: '2px 10px',
-                  borderRadius: 999,
-                  background: s.status === 'paid' ? '#DCFCE7' : '#FEF3C7',
-                  fontSize: 12,
-                }}
-              >
+              <span style={{ minWidth: 80, fontWeight: 700 }}>{fmt(s.amount_owed_cents)}</span>
+              <span className={'badge ' + (s.status === 'paid' ? 'badge--paid' : 'badge--pending')}>
                 {s.status === 'paid'
                   ? s.payment_method === 'bit'
                     ? 'paid · Bit'
@@ -693,6 +478,7 @@ function SettlementBoard({
               {isHost && (
                 <button
                   type="button"
+                  className="btn btn--sm"
                   onClick={() => void setStatus(s.id, s.status === 'paid' ? 'pending' : 'paid')}
                   style={{ marginLeft: 'auto' }}
                 >
