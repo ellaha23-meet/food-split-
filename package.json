@@ -1,0 +1,23 @@
+{
+  "name": "tally",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "(cd apps/web && tsc --noEmit) && (cd packages/reconcile && tsc --noEmit)",
+    "lint": "(cd apps/web && npx next lint) && (cd packages/reconcile && npx eslint src)",
+    "test": "(cd apps/web && npx vitest run) && (cd packages/reconcile && npx vitest run)",
+    "build": "(cd apps/web && npx next build)",
+    "check-secrets": "node scripts/check-secrets.mjs"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.5.0"
+  }
+}

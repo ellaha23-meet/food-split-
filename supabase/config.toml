@@ -1,0 +1,26 @@
+[project]
+# Supabase project ref — fill in from the Supabase dashboard.
+# project_id = "your-project-id"
+
+[db]
+# Local dev port (supabase start)
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = true
+
+[storage]
+enabled = true
+
+[realtime]
+enabled = true

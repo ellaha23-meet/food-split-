@@ -1,0 +1,25 @@
+{
+  "name": "@tally/reconcile",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.0",
+    "fast-check": "^3.0.0",
+    "vitest": "^2.0.0"
+  }
+}
