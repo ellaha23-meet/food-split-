@@ -14,15 +14,17 @@
 
 import { useRef, useState } from 'react';
 import { fmt } from '@/lib/format';
-import { computeSplit, itemTotal, type PItem } from '@/lib/prototype/split';
+import { computeSplit, evenSplit, itemTotal, type PItem } from '@/lib/prototype/split';
 
-type Phase = 'capture' | 'scanning' | 'review' | 'split';
+type Phase = 'capture' | 'scanning' | 'review' | 'split' | 'dashboard';
 
 interface Diner {
   id: string;
   name: string;
   color: string;
   tipCents: number;
+  // The friend has confirmed they're done picking their meals + tip.
+  done: boolean;
   paid: boolean;
 }
 
@@ -128,12 +130,15 @@ export function Prototype() {
   // Bit-pays them back.
   const payerId = diners[0]?.id ?? null;
   const payerName = diners[0]?.name ?? 'the table';
+  // Completion gate: every friend must confirm their picks before we settle.
+  const doneCount = diners.filter((d) => d.done).length;
+  const allDone = diners.length > 0 && doneCount === diners.length;
 
   // ── diner + claim actions ────────────────────────────────────────────
   function addDiner(name: string) {
     const id = newId();
     const color = COLORS[diners.length % COLORS.length] ?? '#3B82F6';
-    setDiners((d) => [...d, { id, name, color, tipCents: 0, paid: false }]);
+    setDiners((d) => [...d, { id, name, color, tipCents: 0, done: false, paid: false }]);
     setActiveId(id);
   }
   function patchDiner(id: string, patch: Partial<Diner>) {
@@ -148,6 +153,8 @@ export function Prototype() {
         : [...cur, activeId];
       return { ...c, [itemId]: next };
     });
+    // Changing a selection re-opens this friend's confirmation.
+    patchDiner(activeId, { done: false });
   }
 
   const colorOf = (id: string) => diners.find((d) => d.id === id)?.color ?? '#999';
@@ -326,6 +333,209 @@ export function Prototype() {
   }
 
   // ════════════════════════════════════════════════════════════════════
+  // Review dashboard — shown before settling; gates the Bit payment
+  // ════════════════════════════════════════════════════════════════════
+  if (phase === 'dashboard') {
+    const claimersOf = (it: PItem) => claims[it.id] ?? [];
+    const sharedItems = items.filter((it) => claimersOf(it).length >= 2);
+    const personalItems = items.filter((it) => claimersOf(it).length === 1);
+    const unclaimedItems = items.filter((it) => claimersOf(it).length === 0);
+    const waitingOn = diners.filter((d) => !d.done).map((d) => d.name);
+
+    // Each friend's meals with their cents-exact share (matches computeSplit).
+    const mealsFor = (dinerId: string) => {
+      const rows: { item: PItem; shareCents: number; shared: boolean }[] = [];
+      for (const it of items) {
+        const cs = claimersOf(it);
+        const idx = cs.indexOf(dinerId);
+        if (idx === -1) continue;
+        const shares = evenSplit(itemTotal(it), cs.length);
+        rows.push({ item: it, shareCents: shares[idx] ?? 0, shared: cs.length > 1 });
+      }
+      return rows;
+    };
+
+    return (
+      <Shell>
+        <button type="button" onClick={() => setPhase('split')} style={linkBtn}>
+          ← Back to choosing
+        </button>
+        <h2 style={{ marginBottom: 4 }}>Review before paying</h2>
+        <p style={{ color: '#64748B', marginTop: 0 }}>
+          Check who had what, then settle up with Bit.
+        </p>
+
+        {/* Completion status indicator */}
+        {allDone ? (
+          <div style={{ ...banner, background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46' }}>
+            ✓ All {diners.length} {diners.length === 1 ? 'friend has' : 'friends have'} finished
+            choosing — you&apos;re ready to settle up.
+          </div>
+        ) : (
+          <div style={{ ...banner, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B' }}>
+            <strong>⚠ Not everyone is done choosing.</strong>{' '}
+            {doneCount} of {diners.length} friends have confirmed. Payment is locked until everyone
+            finishes{waitingOn.length ? ` — still waiting on ${waitingOn.join(', ')}.` : '.'}
+          </div>
+        )}
+
+        {unclaimedItems.length > 0 && (
+          <div style={{ ...banner, background: '#FFFBEB', border: '1px solid #FCD34D', color: '#92400E' }}>
+            {unclaimedItems.length} item{unclaimedItems.length === 1 ? '' : 's'} still unclaimed
+            ({fmt(split.unclaimedCents)}). Go back and assign {unclaimedItems.length === 1 ? 'it' : 'them'}.
+          </div>
+        )}
+
+        {/* Shared meals */}
+        <section style={{ marginTop: 16 }}>
+          <h3 style={{ marginBottom: 6 }}>🍽️ Shared meals</h3>
+          {sharedItems.length === 0 ? (
+            <p style={{ color: '#94A3B8', margin: 0 }}>No shared meals.</p>
+          ) : (
+            <ul style={mealList}>
+              {sharedItems.map((it) => {
+                const cs = claimersOf(it);
+                return (
+                  <li key={it.id} style={mealRow}>
+                    <div>
+                      <strong>{it.name || 'Item'}</strong>{' '}
+                      <span style={{ color: '#64748B' }}>{fmt(itemTotal(it))}</span>
+                      <span style={{ fontSize: 12, color: '#2563EB', marginLeft: 6 }}>
+                        split ×{cs.length} = {fmt(Math.round(itemTotal(it) / cs.length))} each
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                      {cs.map((id) => (
+                        <span key={id} style={chip(colorOf(id))}>
+                          {nameOf(id)}
+                        </span>
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* Personal meals */}
+        <section style={{ marginTop: 16 }}>
+          <h3 style={{ marginBottom: 6 }}>👤 Personal meals</h3>
+          {personalItems.length === 0 ? (
+            <p style={{ color: '#94A3B8', margin: 0 }}>No personal meals.</p>
+          ) : (
+            <ul style={mealList}>
+              {personalItems.map((it) => {
+                const owner = claimersOf(it)[0] ?? '';
+                return (
+                  <li key={it.id} style={mealRow}>
+                    <div>
+                      <strong>{it.name || 'Item'}</strong>{' '}
+                      <span style={{ color: '#64748B' }}>{fmt(itemTotal(it))}</span>
+                    </div>
+                    <span style={chip(colorOf(owner))}>{nameOf(owner)} only</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* Per-friend summary + payment */}
+        <section style={{ marginTop: 20 }}>
+          <h3 style={{ marginBottom: 8 }}>Each friend pays</h3>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {diners.map((d) => {
+              const t = totalFor(d.id);
+              const rows = mealsFor(d.id);
+              const isPayer = d.id === payerId;
+              const owe = t?.totalCents ?? 0;
+              const canPay = allDone && owe > 0;
+              return (
+                <div
+                  key={d.id}
+                  style={{ border: `1px solid ${d.color}55`, borderRadius: 12, padding: 14, background: '#fff' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <strong style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 12, height: 12, borderRadius: 999, background: d.color }} />
+                      {d.name}
+                      {isPayer && ' 💳'}
+                    </strong>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: d.done ? '#047857' : '#B45309' }}>
+                      {d.done ? '✓ confirmed' : 'still choosing'}
+                    </span>
+                  </div>
+
+                  {rows.length === 0 ? (
+                    <p style={{ color: '#94A3B8', margin: '8px 0' }}>No meals selected.</p>
+                  ) : (
+                    <ul style={{ ...mealList, marginTop: 8 }}>
+                      {rows.map(({ item, shareCents, shared }) => (
+                        <li
+                          key={item.id}
+                          style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '2px 0' }}
+                        >
+                          <span>
+                            {item.name || 'Item'}{' '}
+                            {shared && <span style={{ fontSize: 11, color: '#2563EB' }}>(shared)</span>}
+                          </span>
+                          <span>{fmt(shareCents)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <p style={{ margin: '8px 0 10px', fontSize: 14, color: '#475569' }}>
+                    Items {fmt(t?.itemsCents ?? 0)} · Tax {fmt(t?.taxCents ?? 0)} · Tip {fmt(t?.tipCents ?? 0)} ·{' '}
+                    <strong style={{ fontSize: 16, color: '#0F172A' }}>{fmt(owe)}</strong>
+                  </p>
+
+                  {isPayer ? (
+                    <p style={{ fontSize: 13, color: '#475569', margin: 0 }}>
+                      💳 {d.name} covered the bill — collects from everyone else.
+                    </p>
+                  ) : d.paid ? (
+                    <p style={{ color: '#047857', fontWeight: 700, margin: 0 }}>✓ Paid {fmt(owe)} with Bit</p>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={!canPay}
+                      onClick={() => setPayFor(d)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        fontWeight: 800,
+                        fontSize: 15,
+                        color: canPay ? '#062E2E' : '#64748B',
+                        background: canPay ? '#00C2C7' : '#CBD5E1',
+                        border: 'none',
+                        borderRadius: 12,
+                        cursor: canPay ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      {allDone ? `Pay ${fmt(owe)} to ${payerName} with Bit` : 'Not ready yet'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {payFor && (
+          <BitModal
+            amountCents={totalFor(payFor.id)?.totalCents ?? 0}
+            payeeName={payFor.id === payerId ? 'the restaurant' : payerName}
+            onClose={() => setPayFor(null)}
+            onConfirm={() => patchDiner(payFor.id, { paid: true })}
+          />
+        )}
+      </Shell>
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════
   // Split
   // ════════════════════════════════════════════════════════════════════
   return (
@@ -407,15 +617,14 @@ export function Prototype() {
         </p>
       )}
 
-      {/* Active diner: tip + pay */}
+      {/* Active diner: tip + confirm they're done choosing */}
       {activeDiner && (
         <DinerPanel
           diner={activeDiner}
           total={totalFor(activeDiner.id)}
           isPayer={activeDiner.id === payerId}
-          payerName={payerName}
-          onTip={(cents) => patchDiner(activeDiner.id, { tipCents: cents })}
-          onPay={() => setPayFor(activeDiner)}
+          onTip={(cents) => patchDiner(activeDiner.id, { tipCents: cents, done: false })}
+          onToggleDone={() => patchDiner(activeDiner.id, { done: !activeDiner.done })}
         />
       )}
 
@@ -472,14 +681,19 @@ export function Prototype() {
         </table>
       </section>
 
-      {payFor && (
-        <BitModal
-          amountCents={totalFor(payFor.id)?.totalCents ?? 0}
-          payeeName={payFor.id === payerId ? 'the restaurant' : payerName}
-          onClose={() => setPayFor(null)}
-          onConfirm={() => patchDiner(payFor.id, { paid: true })}
-        />
-      )}
+      <p style={{ marginTop: 14, fontSize: 14, color: allDone ? '#047857' : '#B45309' }}>
+        {allDone
+          ? `✓ All ${diners.length} ${diners.length === 1 ? 'friend has' : 'friends have'} confirmed their picks.`
+          : `${doneCount} of ${diners.length || 0} friends have confirmed — tap a friend, then “I'm done choosing”.`}
+      </p>
+      <button
+        type="button"
+        disabled={diners.length === 0}
+        onClick={() => setPhase('dashboard')}
+        style={{ ...primaryBtn, opacity: diners.length === 0 ? 0.5 : 1 }}
+      >
+        Review &amp; settle up →
+      </button>
     </Shell>
   );
 }
@@ -531,7 +745,7 @@ function DinerBar({
           <span style={{ width: 12, height: 12, borderRadius: 999, background: d.color }} />
           {d.name}
           {d.id === payerId && ' 💳'}
-          {d.paid && ' ✓'}
+          {d.done && ' ✓'}
         </button>
       ))}
 
@@ -564,16 +778,14 @@ function DinerPanel({
   diner,
   total,
   isPayer,
-  payerName,
   onTip,
-  onPay,
+  onToggleDone,
 }: {
   diner: Diner;
   total: { itemsCents: number; taxCents: number; tipCents: number; totalCents: number } | undefined;
   isPayer: boolean;
-  payerName: string;
   onTip: (cents: number) => void;
-  onPay: () => void;
+  onToggleDone: () => void;
 }) {
   const [custom, setCustom] = useState('');
   const items = total?.itemsCents ?? 0;
@@ -597,81 +809,72 @@ function DinerPanel({
         Tip on {fmt(items)} of items — their call.
       </p>
 
-      {diner.paid ? (
-        <p style={{ color: '#047857', fontWeight: 700 }}>
-          ✓ Paid {fmt(grand)} with Bit
-        </p>
-      ) : (
-        <>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            {TIP_PERCENTS.map((pct) => {
-              const active = pct === activePct;
-              return (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={() => onTip(Math.round((items * pct) / 100))}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 999,
-                    border: active ? '2px solid #2563EB' : '1px solid #CBD5E1',
-                    background: active ? '#2563EB' : '#fff',
-                    color: active ? '#fff' : '#0F172A',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {pct === 0 ? 'No tip' : `${pct}%`}
-                </button>
-              );
-            })}
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="custom"
-                value={custom}
-                onChange={(e) => setCustom(e.target.value)}
-                onBlur={() => custom !== '' && onTip(Math.round(parseFloat(custom || '0') * 100))}
-                style={{ width: 80, padding: 6 }}
-              />
-              <span style={{ fontSize: 13, color: '#475569' }}>₪</span>
-            </span>
-          </div>
-
-          <p style={{ marginTop: 12, fontSize: 15 }}>
-            Items {fmt(items)} · Tax {fmt(tax)} · Tip <strong>{fmt(tip)}</strong> ·{' '}
-            {isPayer ? 'Their share ' : 'Owes '}
-            <strong style={{ fontSize: 17 }}>{fmt(grand)}</strong>
-          </p>
-
-          {isPayer ? (
-            <p style={{ fontSize: 14, color: '#475569', marginTop: 4 }}>
-              💳 {diner.name} covered the bill — everyone else Bit-pays them back.
-            </p>
-          ) : (
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        {TIP_PERCENTS.map((pct) => {
+          const active = pct === activePct;
+          return (
             <button
+              key={pct}
               type="button"
-              disabled={grand <= 0}
-              onClick={onPay}
+              onClick={() => onTip(Math.round((items * pct) / 100))}
               style={{
-                marginTop: 4,
-                padding: '12px 22px',
-                fontWeight: 800,
-                fontSize: 16,
-                color: '#062E2E',
-                background: grand > 0 ? '#00C2C7' : '#CBD5E1',
-                border: 'none',
-                borderRadius: 12,
-                cursor: grand > 0 ? 'pointer' : 'not-allowed',
+                padding: '8px 14px',
+                borderRadius: 999,
+                border: active ? '2px solid #2563EB' : '1px solid #CBD5E1',
+                background: active ? '#2563EB' : '#fff',
+                color: active ? '#fff' : '#0F172A',
+                fontWeight: 600,
+                cursor: 'pointer',
               }}
             >
-              Pay {fmt(grand)} to {payerName} with Bit
+              {pct === 0 ? 'No tip' : `${pct}%`}
             </button>
-          )}
-        </>
+          );
+        })}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="custom"
+            value={custom}
+            onChange={(e) => setCustom(e.target.value)}
+            onBlur={() => custom !== '' && onTip(Math.round(parseFloat(custom || '0') * 100))}
+            style={{ width: 80, padding: 6 }}
+          />
+          <span style={{ fontSize: 13, color: '#475569' }}>₪</span>
+        </span>
+      </div>
+
+      <p style={{ marginTop: 12, fontSize: 15 }}>
+        Items {fmt(items)} · Tax {fmt(tax)} · Tip <strong>{fmt(tip)}</strong> ·{' '}
+        {isPayer ? 'Their share ' : 'Owes '}
+        <strong style={{ fontSize: 17 }}>{fmt(grand)}</strong>
+      </p>
+
+      {isPayer && (
+        <p style={{ fontSize: 14, color: '#475569', marginTop: 4 }}>
+          💳 {diner.name} covered the bill — everyone else Bit-pays them back.
+        </p>
       )}
+
+      <button
+        type="button"
+        onClick={onToggleDone}
+        style={{
+          marginTop: 10,
+          padding: '12px 22px',
+          fontWeight: 800,
+          fontSize: 15,
+          border: 'none',
+          borderRadius: 12,
+          cursor: 'pointer',
+          color: diner.done ? '#065F46' : '#fff',
+          background: diner.done ? '#D1FAE5' : '#0F172A',
+        }}
+      >
+        {diner.done ? `✓ ${diner.name} is done — tap to change` : "I'm done choosing"}
+      </button>
     </section>
   );
 }
@@ -860,3 +1063,40 @@ const linkBtn: React.CSSProperties = {
   cursor: 'pointer',
   fontSize: 14,
 };
+
+// ── dashboard style helpers ─────────────────────────────────────────────
+const banner: React.CSSProperties = {
+  marginTop: 14,
+  padding: '12px 14px',
+  borderRadius: 12,
+  fontSize: 14,
+  lineHeight: 1.4,
+};
+
+const mealList: React.CSSProperties = {
+  listStyle: 'none',
+  padding: 0,
+  margin: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+};
+
+const mealRow: React.CSSProperties = {
+  padding: '8px 10px',
+  border: '1px solid #E5E7EB',
+  borderRadius: 10,
+  background: '#fff',
+};
+
+const chip = (color: string): React.CSSProperties => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 4,
+  padding: '2px 8px',
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 600,
+  color: '#fff',
+  background: color,
+});
