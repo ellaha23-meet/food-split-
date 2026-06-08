@@ -22,12 +22,13 @@ const BOTTOM_COLOR = '#F2E4CC'; // warm cream, bottom band
 // Positions are kept toward the edges so they frame the content rather than
 // sit under the readable middle.
 const FOOD = [
-  { src: '/food/burger.png', top: '4%', left: '2%', size: 150, rotate: -8 },
-  { src: '/food/fries.png', top: '9%', right: '3%', size: 160, rotate: 10 },
-  { src: '/food/spaghetti.png', top: '45%', left: '1%', size: 160, rotate: -6 },
-  { src: '/food/milkshake.png', top: '40%', right: '2%', size: 95, rotate: 8 },
-  { src: '/food/fries.png', bottom: '6%', left: '6%', size: 140, rotate: 14 },
-  { src: '/food/spaghetti.png', bottom: '9%', right: '5%', size: 150, rotate: -10 },
+  { src: '/food/burger.png', top: '3%', left: '1%', size: 200, rotate: -12 },
+  { src: '/food/fries.png', top: '7%', right: '9%', size: 95, rotate: 18 },
+  { src: '/food/milkshake.png', top: '23%', right: '1%', size: 135, rotate: -6 },
+  { src: '/food/spaghetti.png', top: '57%', left: '3%', size: 110, rotate: 9 },
+  { src: '/food/fries.png', bottom: '4%', left: '10%', size: 180, rotate: -8 },
+  { src: '/food/burger.png', bottom: '15%', right: '27%', size: 80, rotate: 15 },
+  { src: '/food/spaghetti.png', bottom: '6%', right: '2%', size: 190, rotate: -15 },
 ];
 
 export function BackgroundDecor() {
