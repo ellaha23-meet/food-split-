@@ -5,7 +5,7 @@
  * G2: pure — delegates to pure sub-functions; zero I/O anywhere in this path.
  */
 
-import { type Cents, addCents, ZERO, floorToCents, addRational, ZERO_RATIONAL } from './money.js';
+import { type Cents, floorToCents, addRational, ZERO_RATIONAL } from './money.js';
 import { computeShares, type LineItem, type Claim } from './shares.js';
 import { allocate, type AllocationInput } from './allocate.js';
 import { roundAllocations, type ParticipantTotal } from './round.js';
@@ -52,7 +52,6 @@ export function compute(input: ComputeInput): ComputeResult {
     discountCents,
     discountMode,
     discountAssigneeId,
-    printedTotalCents,
   } = input;
 
   // Step 1: Per-item shares

@@ -15,8 +15,6 @@ import {
   ZERO_RATIONAL,
   addRational,
   subRational,
-  mulRational,
-  scaleByCents,
   rationalNonNeg,
   fromCents,
 } from './money.js';

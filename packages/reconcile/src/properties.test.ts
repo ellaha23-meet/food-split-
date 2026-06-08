@@ -20,11 +20,6 @@ import { asCents } from './money.js';
 
 // ─── Generators ──────────────────────────────────────────────────────────────
 
-const participantIdArb = fc.stringOf(fc.constantFrom(...'abcdefghijklmnop'.split('')), {
-  minLength: 2,
-  maxLength: 6,
-});
-
 const positiveCentsArb = fc.integer({ min: 1, max: 50000 });
 const nonNegCentsArb = fc.integer({ min: 0, max: 50000 });
 
@@ -58,7 +53,7 @@ function makeReceiptArb() {
         serviceChargeCents,
         serviceChargeMode,
         discountCents,
-        discountMode,
+        discountMode: _discountMode,
       }) => {
         const participantIds = Array.from({ length: participantCount }, (_, i) => `p${i}`);
         return fc

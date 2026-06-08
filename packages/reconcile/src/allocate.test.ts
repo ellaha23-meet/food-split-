@@ -28,9 +28,6 @@ function baseInput(overrides: Partial<AllocationInput> = {}): AllocationInput {
   };
 }
 
-function sumRationals(allocs: ReadonlyArray<{ taxRational: import('./money.js').Rational }>) {
-  return allocs.reduce((acc, a) => addRational(acc, a.taxRational), ZERO_RATIONAL);
-}
 
 describe('allocate — proportional tax', () => {
   it('two participants split tax proportionally to subtotals', () => {
