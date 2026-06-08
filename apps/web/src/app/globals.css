@@ -1,41 +1,44 @@
-/*
- * Tally — design system
- * A bold, playful, "world-class" food-brand aesthetic inspired by craft
- * burger branding: chunky bubble display type, a warm cream canvas, punchy
- * red + sunny yellow accents, white-outlined sticker labels, wavy dividers
- * and fat rounded pill buttons. Visual only — copy & behaviour are untouched.
- */
+/* ===================================================================
+   CRAV-style theme for Tally
+   A bold, playful smash-burger look: warm cream canvas, punchy red,
+   golden-yellow accents, fat rounded "sticker" display type.
+   Closest free Google Font substitutes for the original brand faces.
+   =================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bagel+Fat+One&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Palette */
-  --cream: #efe1c4;
-  --cream-deep: #e7d6b3;
-  --paper: #fbf4e6;
-  --ink: #211b18;
-  --ink-soft: #5b5048;
-  --red: #f2392a;
-  --red-deep: #d92414;
-  --yellow: #f8c73e;
-  --yellow-deep: #f0b51f;
-  --teal: #00c2c7;
-  --teal-deep: #00a0b4;
-  --teal-ink: #062e2e;
-  --green: #1f9d57;
-  --line: #e6d8bd;
+  /* ---- palette ---- */
+  --crav-cream: #ecdcbd; /* page canvas (tan) */
+  --crav-cream-soft: #f6ecd6; /* lighter cream panels */
+  --crav-cream-line: #e0cda6; /* hairline / input borders */
+  --crav-red: #fb2a1b; /* primary brand red */
+  --crav-red-dark: #d81e10;
+  --crav-yellow: #fbc63b; /* accent yellow */
+  --crav-yellow-soft: #ffe08a;
+  --crav-ink: #20160e; /* near-black warm text */
+  --crav-ink-soft: #6b5b46; /* muted brown text */
+  --crav-white: #fffdf7; /* warm card white */
+  --crav-bit: #00c2c7; /* keep Bit's own teal */
 
-  /* Type */
-  --font-display: 'Bagel Fat One', system-ui, sans-serif;
-  --font-headline: 'Anton', 'Arial Narrow', sans-serif;
-  --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+  /* ---- type ---- */
+  --font-display: 'Luckiest Guy', system-ui, cursive; /* logo / headings */
+  --font-fat: 'Anton', 'Luckiest Guy', sans-serif; /* huge condensed */
+  --font-body: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
 
-  /* Form */
-  --radius: 16px;
-  --radius-lg: 24px;
-  --shadow-sm: 0 2px 0 rgba(33, 27, 24, 0.12);
-  --shadow: 0 10px 30px rgba(33, 27, 24, 0.12);
-  --shadow-pop: 0 14px 0 rgba(33, 27, 24, 0.1);
+  /* ---- spacing scale ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ---- shape ---- */
+  --radius-pill: 999px;
+  --radius-card: 18px;
+  --shadow-hard: 4px 4px 0 var(--crav-ink); /* sticker drop shadow */
 }
 
 * {
@@ -49,571 +52,231 @@ body {
 }
 
 body {
-  font-family: var(--font-body);
-  color: var(--ink);
-  background-color: var(--cream);
-  background-image:
-    radial-gradient(circle at 12% -10%, rgba(248, 199, 62, 0.5), transparent 45%),
-    radial-gradient(circle at 92% 8%, rgba(242, 57, 42, 0.18), transparent 40%);
+  background-color: var(--crav-cream);
+  background-image: radial-gradient(
+    120% 60% at 50% -10%,
+    var(--crav-yellow-soft) 0%,
+    var(--crav-cream) 55%
+  );
+  background-repeat: no-repeat;
   background-attachment: fixed;
+  color: var(--crav-ink);
+  font-family: var(--font-body);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
 }
 
-::selection {
-  background: var(--yellow);
-  color: var(--ink);
-}
-
-/* ── Page scaffolding ─────────────────────────────────────────────────── */
-.page {
-  min-height: 100vh;
-  padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 32px) 80px;
-}
-
-.container {
-  width: 100%;
-  max-width: 880px;
-  margin: 0 auto;
-}
-
-.container--narrow {
-  max-width: 460px;
-}
-
-/* ── Brand wordmark ───────────────────────────────────────────────────── */
-.brand {
+/* ---- headings: fat rounded display, in brand red ---- */
+h1,
+h2,
+h3 {
   font-family: var(--font-display);
-  color: var(--red);
+  font-weight: 400; /* Luckiest Guy ships a single weight */
+  color: var(--crav-red);
   letter-spacing: 0.5px;
-  line-height: 0.9;
-  margin: 0;
+  line-height: 1.02;
+  text-transform: uppercase;
+  margin: 0 0 var(--sp-4);
+  /* soft white outline so red type pops on cream, like the CRAV stickers */
   text-shadow:
-    3px 3px 0 #fff,
-    -1px -1px 0 #fff,
-    1px -1px 0 #fff,
-    -1px 1px 0 #fff,
-    5px 7px 0 rgba(33, 27, 24, 0.12);
+    2px 2px 0 #fff,
+    -1px -1px 0 #fff;
 }
 
-.brand--xl {
-  font-size: clamp(54px, 12vw, 104px);
+h1 {
+  font-size: clamp(2.6rem, 6vw, 4rem);
+}
+h2 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+h3 {
+  font-size: 1.3rem;
 }
 
-.brand--lg {
-  font-size: clamp(40px, 8vw, 64px);
+a {
+  color: var(--crav-red-dark);
 }
 
-.brand--sm {
-  font-size: clamp(28px, 6vw, 40px);
-}
-
-.tagline {
-  font-weight: 700;
-  font-size: clamp(15px, 2.4vw, 19px);
-  color: var(--ink-soft);
-  max-width: 46ch;
-  margin: 10px 0 0;
-}
-
-/* ── Sticker labels (white-outlined, tilted) ──────────────────────────── */
-.sticker {
-  display: inline-block;
+/* ---- default buttons → fat red sticker pills ---- */
+button {
   font-family: var(--font-display);
-  font-size: clamp(13px, 2vw, 16px);
-  line-height: 1;
-  padding: 9px 16px 11px;
-  border-radius: 999px;
-  background: var(--red);
-  color: #fff;
-  border: 3px solid #fff;
-  box-shadow: 0 6px 16px rgba(33, 27, 24, 0.18);
-  transform: rotate(-3deg);
-  letter-spacing: 0.5px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-}
-
-.sticker--yellow {
-  background: var(--yellow);
-  color: var(--ink);
-  transform: rotate(2deg);
-}
-
-.sticker--ink {
-  background: var(--ink);
-  color: #fff;
-  transform: rotate(-1.5deg);
-}
-
-/* ── Headlines ────────────────────────────────────────────────────────── */
-.headline {
-  font-family: var(--font-headline);
-  text-transform: uppercase;
-  line-height: 0.92;
-  letter-spacing: 0.5px;
-  margin: 12px 0 0;
-  color: var(--ink);
-}
-
-.headline--xl {
-  font-size: clamp(42px, 9vw, 92px);
-}
-
-.headline--lg {
-  font-size: clamp(30px, 6vw, 52px);
-}
-
-.headline--red {
-  color: var(--red);
-  text-shadow: 2px 2px 0 #fff;
-}
-
-.section-title {
-  font-family: var(--font-headline);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  font-size: clamp(20px, 3.5vw, 30px);
-  margin: 0 0 4px;
-  color: var(--ink);
-}
-
-.muted {
-  color: var(--ink-soft);
-}
-
-/* ── Cards ────────────────────────────────────────────────────────────── */
-.card {
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: var(--radius-lg);
-  padding: clamp(18px, 3vw, 28px);
-  box-shadow: var(--shadow-pop);
-}
-
-.card--flat {
-  box-shadow: var(--shadow);
-  border-width: 2px;
-  border-color: var(--line);
-}
-
-/* ── Wavy divider ─────────────────────────────────────────────────────── */
-.wave {
-  display: block;
-  width: 100%;
-  height: 34px;
-  margin: 8px 0;
-  color: var(--red);
-}
-
-.wave svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* ── Buttons ──────────────────────────────────────────────────────────── */
-.btn {
-  font-family: var(--font-body);
-  font-weight: 900;
-  font-size: 16px;
-  letter-spacing: 0.3px;
-  padding: 13px 26px;
-  border-radius: 999px;
-  border: 3px solid var(--ink);
-  background: #fff;
-  color: var(--ink);
+  font-size: 0.95rem;
+  color: var(--crav-white);
+  background: var(--crav-red);
+  border: 2px solid var(--crav-ink);
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
   cursor: pointer;
+  box-shadow: var(--shadow-hard);
   transition:
-    transform 0.08s ease,
-    box-shadow 0.12s ease,
-    background 0.12s ease;
-  box-shadow: var(--shadow-sm);
+    transform 0.06s ease,
+    box-shadow 0.06s ease,
+    filter 0.12s ease;
 }
 
-.btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 rgba(33, 27, 24, 0.16);
+button:hover:not(:disabled) {
+  filter: brightness(1.04);
 }
 
-.btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 0 rgba(33, 27, 24, 0.16);
+button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--crav-ink);
 }
 
-.btn:disabled {
-  opacity: 0.45;
+button:disabled {
   cursor: not-allowed;
+  filter: saturate(0.5) brightness(0.98);
+  box-shadow: 2px 2px 0 var(--crav-ink);
 }
 
-.btn--primary {
-  background: var(--red);
-  color: #fff;
-}
-
-.btn--yellow {
-  background: var(--yellow);
-  color: var(--ink);
-}
-
-.btn--dark {
-  background: var(--ink);
-  color: #fff;
-}
-
-.btn--bit {
-  background: var(--teal);
-  color: var(--teal-ink);
-  border-color: var(--teal-ink);
-}
-
-.btn--lg {
-  font-size: 18px;
-  padding: 16px 34px;
-}
-
-.btn--block {
-  width: 100%;
-}
-
-.btn--sm {
-  font-size: 14px;
-  padding: 8px 16px;
-  border-width: 2px;
-}
-
-/* A plain text/link-style button */
-.btn-link {
-  background: none;
-  border: none;
-  color: var(--red-deep);
+/* ---- inputs: rounded, cream-tinted, bold border ---- */
+input,
+select,
+textarea {
   font-family: var(--font-body);
-  font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-  font-size: 15px;
-  padding: 6px;
-}
-
-.btn-link:hover {
-  color: var(--red);
-}
-
-/* Tiny icon button (remove row) */
-.icon-btn {
-  background: #fff;
-  border: 2px solid var(--line);
-  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--crav-ink);
+  background: var(--crav-white);
+  border: 2px solid var(--crav-cream-line);
   border-radius: 10px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.icon-btn:hover {
-  border-color: var(--red);
-  color: var(--red);
-}
-
-/* ── Form fields ──────────────────────────────────────────────────────── */
-.field {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--ink);
-  background: #fff;
-  border: 2px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-  width: 100%;
+  padding: 8px 10px;
   outline: none;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.field:focus {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(242, 57, 42, 0.18);
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--crav-red);
 }
 
-.label {
-  font-weight: 800;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--ink-soft);
+/* ---- tables read as clean cream cards ---- */
+table {
+  background: transparent;
 }
 
-/* ── Pills / chips ────────────────────────────────────────────────────── */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 2px solid var(--ink);
-  background: #fff;
-  color: var(--ink);
-  font-weight: 800;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.08s ease, background 0.12s ease;
-}
-
-.chip:hover {
-  transform: translateY(-1px);
-}
-
-.chip--active {
-  background: var(--ink);
-  color: #fff;
-}
-
-.chip--static {
-  cursor: default;
-  border-color: var(--line);
-  background: var(--paper);
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  flex: none;
-  border: 1.5px solid rgba(0, 0, 0, 0.15);
-}
-
-/* ── Tap-the-item grid ────────────────────────────────────────────────── */
-.item-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.item-card {
-  text-align: left;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 2px solid var(--line);
-  background: var(--paper);
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+th {
   font-family: var(--font-body);
-}
-
-.item-card:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.item-card:disabled {
-  cursor: default;
-}
-
-.item-card--mine {
-  border-color: var(--red);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(242, 57, 42, 0.16);
-}
-
-.item-card--unclaimed {
-  border-style: dashed;
-  border-color: var(--red);
-  background: #fdecea;
-}
-
-.item-name {
-  font-weight: 800;
-  font-size: 16px;
-}
-
-.item-price {
   font-weight: 700;
-  color: var(--ink-soft);
+  color: var(--crav-ink-soft);
 }
 
-.tag {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+td {
+  padding: 4px 2px;
 }
 
-.tag--split {
-  color: var(--red-deep);
+hr {
+  border: none;
+  border-top: 3px dashed var(--crav-yellow);
+  margin: var(--sp-5) 0;
 }
 
-.tag--unclaimed {
-  color: var(--red);
-}
-
-/* ── Tables ───────────────────────────────────────────────────────────── */
-.totals {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.totals th {
-  text-align: right;
-  color: var(--ink-soft);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 6px 8px;
-}
-
-.totals th:first-child,
-.totals td:first-child {
-  text-align: left;
-}
-
-.totals td {
-  text-align: right;
-  padding: 8px;
-  border-top: 1px solid var(--line);
-}
-
-.totals tfoot td {
-  border-top: 3px solid var(--ink);
-  font-weight: 900;
-}
-
-.totals tr.is-you {
-  font-weight: 900;
-}
-
-.edit-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 8px;
-}
-
-.edit-table th {
-  text-align: left;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--ink-soft);
-  padding: 0 6px;
-}
-
-/* ── Panels / notices ─────────────────────────────────────────────────── */
-.panel {
-  margin-top: 18px;
-  padding: clamp(16px, 3vw, 22px);
-  border-radius: var(--radius);
-  background: #fff;
-  border: 3px solid var(--ink);
-  box-shadow: var(--shadow-pop);
-}
-
-.notice {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-weight: 700;
-  background: #fff6da;
-  border: 2px solid var(--yellow-deep);
-}
-
-.error {
-  color: var(--red-deep);
+strong {
   font-weight: 800;
 }
 
-.amount {
-  font-family: var(--font-headline);
-  letter-spacing: 0.5px;
+/* ===================================================================
+   App chrome — the branded header + canvas, injected by layout.tsx
+   =================================================================== */
+
+.crav-shell {
+  min-height: 100vh;
 }
 
-/* ── Status badges ────────────────────────────────────────────────────── */
-.badge {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-.badge--paid {
-  background: #d9f7e4;
-  color: var(--green);
-}
-
-.badge--pending {
-  background: #fff0cf;
-  color: #9a6a00;
-}
-
-/* ── Receipt dropzone ─────────────────────────────────────────────────── */
-.dropzone {
-  border: 3px dashed var(--ink);
-  border-radius: var(--radius-lg);
-  padding: clamp(28px, 5vw, 44px);
-  text-align: center;
-  background: var(--paper);
-}
-
-.dropzone__icon {
-  font-size: 60px;
-  line-height: 1;
-}
-
-/* ── Bit modal ────────────────────────────────────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(33, 27, 24, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 50;
-  backdrop-filter: blur(2px);
-}
-
-.modal {
-  width: 360px;
-  max-width: 100%;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-  border: 3px solid var(--ink);
-}
-
-.modal__head {
-  background: linear-gradient(135deg, var(--teal), var(--teal-deep));
-  color: var(--teal-ink);
-  padding: 18px 22px;
+.crav-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--sp-4);
+  padding: 14px clamp(16px, 4vw, 40px);
+  background: linear-gradient(var(--crav-cream), rgba(236, 220, 189, 0.82));
+  backdrop-filter: blur(6px);
 }
 
-.modal__body {
-  padding: 24px;
-  text-align: center;
+.crav-logo {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  color: var(--crav-red);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transform: rotate(-3deg);
+  text-shadow:
+    2px 2px 0 #fff,
+    3px 3px 0 var(--crav-ink);
 }
 
-/* utility */
-.row {
+.crav-nav {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
   align-items: center;
+  gap: var(--sp-3);
 }
 
-.stack > * + * {
-  margin-top: 14px;
+.crav-pill {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  font-size: 0.95rem;
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--crav-ink);
+  box-shadow: var(--shadow-hard);
+  display: inline-block;
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.06s ease;
 }
 
-.mt-sm { margin-top: 8px; }
-.mt { margin-top: 16px; }
-.mt-lg { margin-top: 28px; }
+.crav-pill:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--crav-ink);
+}
+
+.crav-pill--red {
+  background: var(--crav-red);
+  color: var(--crav-white);
+}
+
+.crav-pill--ghost {
+  background: transparent;
+  color: var(--crav-ink);
+}
+
+/* sticker tagline used in the header strip */
+.crav-tagline {
+  display: inline-block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  color: var(--crav-red);
+  background: var(--crav-white);
+  border: 2px solid var(--crav-ink);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  transform: rotate(-2deg);
+  box-shadow: var(--shadow-hard);
+}
+
+.crav-canvas {
+  position: relative;
+}
+
+.crav-footer {
+  text-align: center;
+  padding: var(--sp-6) var(--sp-4);
+  color: var(--crav-ink-soft);
+  font-weight: 700;
+}
+
+.crav-footer .crav-logo {
+  font-size: 1.4rem;
+  display: inline-block;
+}
