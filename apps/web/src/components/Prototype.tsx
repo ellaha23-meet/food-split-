@@ -15,6 +15,7 @@
 import { useRef, useState } from 'react';
 import { fmt } from '@/lib/format';
 import { computeSplit, itemTotal, type PItem } from '@/lib/prototype/split';
+import { BackgroundDecor } from '@/components/BackgroundDecor';
 
 type Phase = 'capture' | 'scanning' | 'review' | 'split';
 
@@ -791,13 +792,16 @@ function BitModal({
 // ── shared layout + style helpers ──────────────────────────────────────
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '2rem', maxWidth: 760, margin: '0 auto' }}>
+    <>
+      <BackgroundDecor />
+      <main style={{ fontFamily: 'system-ui', padding: '2rem', maxWidth: 760, margin: '0 auto' }}>
       <h1 style={{ marginBottom: 0 }}>Tally</h1>
       <p style={{ color: '#555', marginTop: 6 }}>
         Snap the receipt, tap what you had, add your tip, and pay with Bit.
       </p>
       {children}
-    </main>
+      </main>
+    </>
   );
 }
 
