@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { recomputeSession } from '@/lib/session/recompute';
+import { applyParticipantTips } from '@/lib/session/applyTips';
 
 export async function POST(
   _req: NextRequest,
@@ -48,7 +49,14 @@ export async function POST(
     );
   }
 
-  const totals = await recomputeSession(sessionId);
+  const engineTotals = await recomputeSession(sessionId);
+
+  // Layer each diner's chosen tip onto the engine's items+tax totals (G3).
+  const { data: participants } = await supabaseAdmin
+    .from('participant')
+    .select('id, tip_cents')
+    .eq('session_id', sessionId);
+  const totals = applyParticipantTips(engineTotals, participants ?? []);
 
   // P5.3 unclaimed block — no orphaned amounts may remain at close.
   if (totals.unclaimedCents > 0) {

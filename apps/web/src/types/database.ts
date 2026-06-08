@@ -70,6 +70,7 @@ export interface Participant {
   color: string;
   is_treated: boolean;
   is_host_proxy: boolean;
+  tip_cents: number;
   joined_at: string;
   last_active_at: string;
 }

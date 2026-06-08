@@ -28,6 +28,8 @@ export interface ParticipantTotalView {
 
 export interface SessionState {
   session: Session;
+  /** Display name of the host — the person everyone pays back. */
+  hostName: string;
   lineItems: LineItem[];
   participants: Participant[];
   claims: Claim[];

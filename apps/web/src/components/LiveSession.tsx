@@ -7,24 +7,23 @@
  *   P3.1 tappable grid + optimistic claim/un-claim (rollback on server reject)
  *   P3.2 emergent sharing (co-tapped item → equal weights → equal split)
  *   P3.3 presence board + unclaimed highlight (the honesty surface)
- *   P5.2 live per-participant breakdown (items + tax + tip), cent-exact
- *   P5.1 host tip controls + grand-total guard messaging
- *   P6   settlement board: deep links + mark-paid
+ *   P5.2 live per-participant breakdown (items + tax + own tip), cent-exact
+ *   per-diner tip: each guest picks their own tip on their share
+ *   Bit settlement: each guest pays the table payer back with Bit (simulated)
  *
- * G3: every total shown is engine output over server state. Optimistic claim
- * toggles are cosmetic only and reconcile/rollback against the server.
+ * G3: every total shown is engine output (items+tax) plus the diner's own tip,
+ * layered server-side. Optimistic claim toggles are cosmetic and reconcile.
  */
 
 import { useMemo, useState } from 'react';
 import { useSessionState } from '@/lib/useSessionState';
 import { fmt } from '@/lib/format';
-import { buildPaymentLinks } from '@/lib/settlement/links';
 
 interface LiveSessionProps {
   sessionId: string;
   /** The viewer's participant id, or null for a pure host/observer view. */
   participantId: string | null;
-  /** Show host-only controls (tip, close, mark-paid). */
+  /** Show host-only controls (close, mark-paid). */
   isHost?: boolean;
 }
 
@@ -48,7 +47,7 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
   if (error && !state) return <p style={{ color: 'crimson' }}>Error: {error}</p>;
   if (!state) return <p>Loading session…</p>;
 
-  const { session, lineItems, participants, totals, settlements } = state;
+  const { session, hostName, lineItems, participants, totals, settlements } = state;
   const locked = session.status !== 'open';
   const colorOf = (pid: string) => participants.find((p) => p.id === pid)?.color ?? '#999';
   const nameOf = (pid: string) =>
@@ -74,7 +73,6 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
       });
       if (!res.ok) throw new Error(`Server rejected (${res.status})`);
       await refetch();
-      // Clear overlay once server truth has caught up.
       setOptimistic((o) => {
         const next = { ...o };
         delete next[itemId];
@@ -94,9 +92,12 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
     }
   }
 
-  const myTotal = participantId
-    ? totals.perParticipant.find((p) => p.participantId === participantId)?.totalCents ?? 0
-    : 0;
+  const mine = participantId
+    ? totals.perParticipant.find((p) => p.participantId === participantId)
+    : undefined;
+  const mySettlement = participantId
+    ? settlements.find((s) => s.participant_id === participantId)
+    : undefined;
 
   return (
     <div style={{ fontFamily: 'system-ui', maxWidth: 760 }}>
@@ -137,7 +138,7 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
 
       {/* Tappable grid (P3.1/3.2) */}
       <section>
-        <strong>Items — tap to claim</strong>
+        <strong>Items — tap what you had</strong>
         <div
           style={{
             display: 'grid',
@@ -148,8 +149,8 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
         >
           {lineItems.map((item) => {
             const claimers = claimsByItem.get(item.id) ?? [];
-            const mine = viewerClaims(item.id);
-            const unclaimed = claimers.length === 0 && !mine;
+            const mineItem = viewerClaims(item.id);
+            const unclaimed = claimers.length === 0 && !mineItem;
             return (
               <button
                 key={item.id}
@@ -161,9 +162,8 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
                   padding: 12,
                   borderRadius: 10,
                   cursor: participantId && !locked ? 'pointer' : 'default',
-                  border: mine ? '2px solid #2563EB' : '1px solid #E5E7EB',
-                  // Unclaimed items are unmistakable — the load-bearing honesty cue.
-                  background: unclaimed ? '#FEE2E2' : mine ? '#EFF6FF' : '#fff',
+                  border: mineItem ? '2px solid #2563EB' : '1px solid #E5E7EB',
+                  background: unclaimed ? '#FEE2E2' : mineItem ? '#EFF6FF' : '#fff',
                   outline: unclaimed ? '2px dashed #DC2626' : 'none',
                 }}
               >
@@ -178,9 +178,7 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
                     />
                   ))}
                   {claimers.length > 1 && (
-                    <span style={{ fontSize: 11, color: '#2563EB' }}>
-                      split ×{claimers.length}
-                    </span>
+                    <span style={{ fontSize: 11, color: '#2563EB' }}>split ×{claimers.length}</span>
                   )}
                   {unclaimed && <span style={{ fontSize: 11, color: '#DC2626' }}>UNCLAIMED</span>}
                 </div>
@@ -196,8 +194,21 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
         </p>
       )}
 
-      {/* Host tip controls (P5.1) */}
-      {isHost && <TipControls sessionId={sessionId} current={session.tip_cents} mode={session.tip_mode} onChange={refetch} />}
+      {/* Per-diner tip + pay (the viewer's own panel) */}
+      {participantId && mine && (
+        <DinerPanel
+          sessionId={sessionId}
+          participantId={participantId}
+          subtotalCents={mine.claimedSubtotalCents}
+          taxCents={mine.taxCents}
+          tipCents={mine.tipCents}
+          totalCents={mine.totalCents}
+          hostName={hostName}
+          locked={locked}
+          alreadyPaid={mySettlement?.status === 'paid'}
+          onChange={refetch}
+        />
+      )}
 
       {/* Live totals (P5.2) */}
       <section style={{ marginTop: 16 }}>
@@ -237,25 +248,19 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
             </tr>
           </tfoot>
         </table>
-        {participantId && (
-          <p style={{ marginTop: 8 }}>
-            Your total: <strong>{fmt(myTotal)}</strong>
-          </p>
-        )}
       </section>
 
-      {/* Close / settle (host, P5.3 → P6) */}
+      {/* Close / settle (host) */}
       {isHost && session.status === 'open' && (
         <CloseButton sessionId={sessionId} onDone={refetch} />
       )}
 
-      {/* Settlement board (P6) */}
+      {/* Settlement board */}
       {settlements.length > 0 && (
         <SettlementBoard
-          sessionId={sessionId}
           settlements={settlements}
           nameOf={nameOf}
-          hostName="the host"
+          hostName={hostName}
           isHost={isHost}
           viewerParticipantId={participantId}
           onChange={refetch}
@@ -265,29 +270,48 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
   );
 }
 
-function TipControls({
+const TIP_PERCENTS = [0, 10, 12, 15, 18];
+
+function DinerPanel({
   sessionId,
-  current,
-  mode,
+  participantId,
+  subtotalCents,
+  taxCents,
+  tipCents,
+  totalCents,
+  hostName,
+  locked,
+  alreadyPaid,
   onChange,
 }: {
   sessionId: string;
-  current: number;
-  mode: 'proportional' | 'even';
+  participantId: string;
+  subtotalCents: number;
+  taxCents: number;
+  tipCents: number;
+  totalCents: number;
+  hostName: string;
+  locked: boolean;
+  alreadyPaid: boolean;
   onChange: () => Promise<void>;
 }) {
-  const [dollars, setDollars] = useState((current / 100).toFixed(2));
-  const [tipMode, setTipMode] = useState(mode);
   const [saving, setSaving] = useState(false);
+  const [custom, setCustom] = useState('');
+  const [showBit, setShowBit] = useState(false);
 
-  async function save() {
+  // The percentage that produced the current tip (for highlighting), if any.
+  const activePct = TIP_PERCENTS.find(
+    (pct) => Math.round((subtotalCents * pct) / 100) === tipCents,
+  );
+
+  async function setTip(cents: number) {
+    if (locked) return;
     setSaving(true);
     try {
-      const cents = Math.round(parseFloat(dollars || '0') * 100);
-      await fetch(`/api/sessions/${sessionId}`, {
+      await fetch('/api/participants', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipCents: cents, tipMode }),
+        body: JSON.stringify({ participantId, tipCents: Math.max(0, cents) }),
       });
       await onChange();
     } finally {
@@ -296,27 +320,264 @@ function TipControls({
   }
 
   return (
-    <section style={{ marginTop: 16, padding: 12, background: '#F9FAFB', borderRadius: 8 }}>
-      <strong>Tip (host)</strong>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
-        <span>$</span>
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          value={dollars}
-          onChange={(e) => setDollars(e.target.value)}
-          style={{ width: 90, padding: 6 }}
-        />
-        <select value={tipMode} onChange={(e) => setTipMode(e.target.value as 'proportional' | 'even')}>
-          <option value="proportional">proportional</option>
-          <option value="even">even per head</option>
-        </select>
-        <button type="button" onClick={() => void save()} disabled={saving}>
-          {saving ? 'Saving…' : 'Update tip'}
+    <section
+      style={{
+        marginTop: 16,
+        padding: 16,
+        background: '#F0F9FF',
+        border: '1px solid #BAE6FD',
+        borderRadius: 12,
+      }}
+    >
+      <strong>Your tip</strong>
+      <p style={{ margin: '4px 0 10px', fontSize: 13, color: '#475569' }}>
+        Tip on your {fmt(subtotalCents)} of items — your call.
+      </p>
+
+      {!locked && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          {TIP_PERCENTS.map((pct) => {
+            const active = pct === activePct;
+            return (
+              <button
+                key={pct}
+                type="button"
+                disabled={saving}
+                onClick={() => void setTip(Math.round((subtotalCents * pct) / 100))}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 999,
+                  border: active ? '2px solid #2563EB' : '1px solid #CBD5E1',
+                  background: active ? '#2563EB' : '#fff',
+                  color: active ? '#fff' : '#0F172A',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {pct === 0 ? 'No tip' : `${pct}%`}
+              </button>
+            );
+          })}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="custom"
+              value={custom}
+              onChange={(e) => setCustom(e.target.value)}
+              onBlur={() => {
+                if (custom !== '') void setTip(Math.round(parseFloat(custom || '0') * 100));
+              }}
+              style={{ width: 80, padding: 6 }}
+            />
+            <span style={{ fontSize: 13, color: '#475569' }}>₪</span>
+          </span>
+        </div>
+      )}
+
+      <p style={{ marginTop: 12, fontSize: 15 }}>
+        Items {fmt(subtotalCents)} · Tax {fmt(taxCents)} · Tip <strong>{fmt(tipCents)}</strong>
+        {' · '}You owe <strong style={{ fontSize: 17 }}>{fmt(totalCents)}</strong>
+      </p>
+
+      {alreadyPaid ? (
+        <p style={{ marginTop: 8, color: '#047857', fontWeight: 700 }}>
+          ✓ Paid {fmt(totalCents)} to {hostName} with Bit
+        </p>
+      ) : (
+        <button
+          type="button"
+          disabled={totalCents <= 0}
+          onClick={() => setShowBit(true)}
+          style={{
+            marginTop: 8,
+            padding: '12px 22px',
+            fontWeight: 800,
+            fontSize: 16,
+            color: '#062E2E',
+            background: totalCents > 0 ? '#00C2C7' : '#CBD5E1',
+            border: 'none',
+            borderRadius: 12,
+            cursor: totalCents > 0 ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Pay {fmt(totalCents)} with Bit
         </button>
-      </div>
+      )}
+
+      {showBit && (
+        <BitModal
+          amountCents={totalCents}
+          payeeName={hostName}
+          onClose={() => setShowBit(false)}
+          onConfirm={async () => {
+            await fetch('/api/settlements', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId, participantId }),
+            });
+            await onChange();
+          }}
+        />
+      )}
     </section>
+  );
+}
+
+/**
+ * Simulated Bit payment sheet. Bit (ביט) never actually moves money here — this
+ * is a faithful-looking confirmation that resolves the diner's share locally.
+ */
+function BitModal({
+  amountCents,
+  payeeName,
+  onClose,
+  onConfirm,
+}: {
+  amountCents: number;
+  payeeName: string;
+  onClose: () => void;
+  onConfirm: () => Promise<void>;
+}) {
+  const [phase, setPhase] = useState<'confirm' | 'processing' | 'done'>('confirm');
+
+  async function pay() {
+    setPhase('processing');
+    await new Promise((r) => setTimeout(r, 1300));
+    await onConfirm();
+    setPhase('done');
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(15,23,42,0.55)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        zIndex: 50,
+      }}
+      onClick={phase === 'processing' ? undefined : onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 340,
+          maxWidth: '100%',
+          borderRadius: 20,
+          overflow: 'hidden',
+          background: '#fff',
+          fontFamily: 'system-ui',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        }}
+      >
+        {/* Bit header */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #00C2C7, #00A0B4)',
+            color: '#062E2E',
+            padding: '18px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: -1 }}>bit</span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>תשלום מהיר</span>
+        </div>
+
+        <div style={{ padding: 22, textAlign: 'center' }}>
+          {phase === 'done' ? (
+            <>
+              <div style={{ fontSize: 52 }}>✅</div>
+              <p style={{ fontWeight: 800, fontSize: 18, margin: '8px 0 2px' }}>Payment sent</p>
+              <p style={{ color: '#475569', margin: 0 }}>
+                {fmt(amountCents)} to {payeeName}
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  marginTop: 18,
+                  padding: '10px 22px',
+                  fontWeight: 700,
+                  border: 'none',
+                  borderRadius: 10,
+                  background: '#0F172A',
+                  color: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                Done
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ color: '#475569', margin: '0 0 4px' }}>Paying</p>
+              <div style={{ fontSize: 40, fontWeight: 900, color: '#0F172A' }}>
+                {fmt(amountCents)}
+              </div>
+              <p style={{ color: '#475569', margin: '6px 0 0' }}>
+                to <strong>{payeeName}</strong>
+              </p>
+              <div
+                style={{
+                  marginTop: 16,
+                  padding: '10px 12px',
+                  background: '#F1F5F9',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  color: '#64748B',
+                }}
+              >
+                Linked: Visa •••• 4821
+              </div>
+
+              <button
+                type="button"
+                disabled={phase === 'processing'}
+                onClick={() => void pay()}
+                style={{
+                  marginTop: 18,
+                  width: '100%',
+                  padding: '14px',
+                  fontWeight: 800,
+                  fontSize: 16,
+                  color: '#062E2E',
+                  background: '#00C2C7',
+                  border: 'none',
+                  borderRadius: 12,
+                  cursor: phase === 'processing' ? 'default' : 'pointer',
+                }}
+              >
+                {phase === 'processing' ? 'Sending…' : 'Confirm payment'}
+              </button>
+              {phase !== 'processing' && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    marginTop: 10,
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748B',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -360,16 +621,17 @@ interface SettlementRow {
   participant_id: string;
   amount_owed_cents: number;
   status: string;
+  payment_method?: string | null;
 }
 
 function SettlementBoard({
   settlements,
   nameOf,
+  hostName,
   isHost,
   viewerParticipantId,
   onChange,
 }: {
-  sessionId: string;
   settlements: SettlementRow[];
   nameOf: (pid: string) => string;
   hostName: string;
@@ -388,17 +650,10 @@ function SettlementBoard({
 
   return (
     <section style={{ marginTop: 20 }}>
-      <strong>Settlement — everyone pays the host</strong>
+      <strong>Settlement — everyone pays {hostName} with Bit</strong>
       <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
         {settlements.map((s) => {
           const isMine = s.participant_id === viewerParticipantId;
-          // P6.1 — demo handles so the deep links render; real handles come from
-          // saved-diner memory (P9, out of prototype scope).
-          const links = buildPaymentLinks({
-            amountCents: s.amount_owed_cents,
-            memo: `Tally: ${nameOf(s.participant_id)}'s share`,
-            handles: { venmo: '@host', cashapp: '$host', paypal: 'host' },
-          });
           return (
             <li
               key={s.id}
@@ -424,28 +679,19 @@ function SettlementBoard({
                   fontSize: 12,
                 }}
               >
-                {s.status}
+                {s.status === 'paid'
+                  ? s.payment_method === 'bit'
+                    ? 'paid · Bit'
+                    : 'paid'
+                  : 'pending'}
               </span>
-              {(isMine || isHost) &&
-                s.status !== 'paid' &&
-                links.map((l) =>
-                  l.url ? (
-                    <a key={l.app} href={l.url} target="_blank" rel="noreferrer" style={{ fontSize: 13 }}>
-                      {l.label} {l.amount}
-                    </a>
-                  ) : (
-                    <span key={l.app} style={{ fontSize: 13, color: '#666' }}>
-                      {l.label}: {l.handle} ({l.amount})
-                    </span>
-                  ),
-                )}
-              {(isMine || isHost) && (
+              {isHost && (
                 <button
                   type="button"
                   onClick={() => void setStatus(s.id, s.status === 'paid' ? 'pending' : 'paid')}
                   style={{ marginLeft: 'auto' }}
                 >
-                  {s.status === 'paid' ? 'Undo' : isHost ? 'Mark paid' : 'I paid'}
+                  {s.status === 'paid' ? 'Undo' : 'Mark paid'}
                 </button>
               )}
             </li>

@@ -8,6 +8,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { recomputeSession } from '@/lib/session/recompute';
+import { applyParticipantTips } from '@/lib/session/applyTips';
 
 interface PatchBody {
   settlementId: string;
@@ -43,6 +45,62 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 
   if (error || !data) {
     return NextResponse.json({ error: error?.message ?? 'Not found' }, { status: 500 });
+  }
+
+  return NextResponse.json({ settlement: data });
+}
+
+/**
+ * POST /api/settlements — a diner settles their own share via Bit, on demand
+ * (before the host formally closes the session).
+ *
+ * Body: { sessionId, participantId }
+ * The amount is recomputed server-side from current state (G3: never trust a
+ * client-sent amount) and the diner's settlement row is upserted as paid.
+ */
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  let body: { sessionId?: string; participantId?: string };
+  try {
+    body = (await req.json()) as { sessionId?: string; participantId?: string };
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const { sessionId, participantId } = body;
+  if (!sessionId || !participantId) {
+    return NextResponse.json({ error: 'Missing sessionId or participantId' }, { status: 400 });
+  }
+
+  const engineTotals = await recomputeSession(sessionId);
+  const { data: participants } = await supabaseAdmin
+    .from('participant')
+    .select('id, tip_cents')
+    .eq('session_id', sessionId);
+  const totals = applyParticipantTips(engineTotals, participants ?? []);
+
+  const mine = totals.perParticipant.find((p) => p.participantId === participantId);
+  if (!mine) {
+    return NextResponse.json({ error: 'Participant not in session' }, { status: 404 });
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('settlement')
+    .upsert(
+      {
+        session_id: sessionId,
+        participant_id: participantId,
+        amount_owed_cents: mine.totalCents,
+        status: 'paid',
+        payment_method: 'bit',
+        paid_at: new Date().toISOString(),
+      },
+      { onConflict: 'session_id,participant_id' },
+    )
+    .select()
+    .single();
+
+  if (error || !data) {
+    return NextResponse.json({ error: error?.message ?? 'Failed to settle' }, { status: 500 });
   }
 
   return NextResponse.json({ settlement: data });

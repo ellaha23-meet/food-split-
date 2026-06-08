@@ -66,3 +66,33 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   return NextResponse.json({ participantId: participant.id });
 }
+
+/**
+ * PATCH /api/participants — set a diner's own tip (per-diner tip model).
+ * Body: { participantId, tipCents }
+ */
+export async function PATCH(req: NextRequest): Promise<NextResponse> {
+  let body: { participantId?: string; tipCents?: number };
+  try {
+    body = (await req.json()) as { participantId?: string; tipCents?: number };
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const { participantId } = body;
+  const tipCents = Math.max(0, Math.round(body.tipCents ?? 0));
+  if (!participantId) {
+    return NextResponse.json({ error: 'Missing participantId' }, { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from('participant')
+    .update({ tip_cents: tipCents })
+    .eq('id', participantId);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, tipCents });
+}
