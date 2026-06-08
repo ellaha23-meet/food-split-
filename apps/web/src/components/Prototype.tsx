@@ -44,6 +44,32 @@ const DEMO_SCAN: { items: PItem[]; taxCents: number } = {
   taxCents: 0,
 };
 
+// A receipt-looking placeholder shown while the demo "scan" runs, so the
+// prototype feels real without requiring an actual camera or photo file.
+const DEMO_RECEIPT_SVG =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="320" viewBox="0 0 260 320">
+      <rect width="260" height="320" rx="10" fill="#ffffff" stroke="#E2E8F0"/>
+      <text x="130" y="40" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="#0F172A">SEASIDE GRILL</text>
+      <text x="130" y="60" text-anchor="middle" font-family="monospace" font-size="11" fill="#64748B">Tel Aviv · Table 7</text>
+      <line x1="24" y1="78" x2="236" y2="78" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+      <g font-family="monospace" font-size="12" fill="#334155">
+        <text x="24" y="104">Shakshuka</text><text x="236" y="104" text-anchor="end">52.00</text>
+        <text x="24" y="128">Hummus plate</text><text x="236" y="128" text-anchor="end">38.00</text>
+        <text x="24" y="152">Grilled sea bass</text><text x="236" y="152" text-anchor="end">94.00</text>
+        <text x="24" y="176">Greek salad</text><text x="236" y="176" text-anchor="end">44.00</text>
+        <text x="24" y="200">Lemonade  x2</text><text x="236" y="200" text-anchor="end">32.00</text>
+        <text x="24" y="224">Espresso  x2</text><text x="236" y="224" text-anchor="end">24.00</text>
+      </g>
+      <line x1="24" y1="242" x2="236" y2="242" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+      <g font-family="monospace" font-size="13" font-weight="bold" fill="#0F172A">
+        <text x="24" y="268">TOTAL</text><text x="236" y="268" text-anchor="end">284.00</text>
+      </g>
+      <text x="130" y="298" text-anchor="middle" font-family="monospace" font-size="11" fill="#94A3B8">Thank you! · Toda</text>
+    </svg>`,
+  );
+
 const newId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `id-${Math.random()}`;
 
@@ -61,16 +87,27 @@ export function Prototype() {
 
   const fileInput = useRef<HTMLInputElement>(null);
 
-  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPhotoUrl(URL.createObjectURL(file));
+  // Turn a captured (or simulated) snapshot into the editable digital receipt.
+  function digitize(previewUrl: string | null) {
+    setPhotoUrl(previewUrl);
     setPhase('scanning');
     setTimeout(() => {
       setItems(DEMO_SCAN.items.map((it) => ({ ...it })));
       setTaxCents(DEMO_SCAN.taxCents);
       setPhase('review');
     }, 1700);
+  }
+
+  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    digitize(URL.createObjectURL(file));
+  }
+
+  // Prototype shortcut: tapping "Take a photo" jumps straight to a digital
+  // receipt without needing a real camera/file, so the demo always works.
+  function simulateCapture() {
+    digitize(DEMO_RECEIPT_SVG);
   }
 
   function enterManually() {
@@ -159,12 +196,15 @@ export function Prototype() {
                 onChange={onPhoto}
                 style={{ display: 'none' }}
               />
-              <button type="button" onClick={() => fileInput.current?.click()} style={primaryBtn}>
+              <button type="button" onClick={simulateCapture} style={primaryBtn}>
                 Take a photo
               </button>
-              <div style={{ marginTop: 14 }}>
+              <div style={{ marginTop: 14, display: 'flex', gap: 16, justifyContent: 'center' }}>
+                <button type="button" onClick={() => fileInput.current?.click()} style={linkBtn}>
+                  upload a real photo
+                </button>
                 <button type="button" onClick={enterManually} style={linkBtn}>
-                  or enter items manually
+                  enter items manually
                 </button>
               </div>
             </>
