@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Tally — self-contained client-side prototype (no backend).
+ * Splity — self-contained client-side prototype (no backend).
  *
  * A single-device walkthrough of the whole idea:
  *   1. capture  — snap/upload a photo of the receipt
@@ -73,12 +73,6 @@ export function Prototype() {
     }, 1700);
   }
 
-  function enterManually() {
-    setItems([{ id: newId(), name: '', qty: 1, unitCents: 0 }]);
-    setTaxCents(0);
-    setPhase('review');
-  }
-
   // ── compute ───────────────────────────────────────────────────────────
   const dinerIds = diners.map((d) => d.id);
   const tipsByDiner = Object.fromEntries(
@@ -148,7 +142,7 @@ export function Prototype() {
             <p style={{ marginTop: 16, fontWeight: 600, color: '#2563EB' }}>Reading your receipt…</p>
           ) : (
             <>
-              <p style={{ marginTop: 12, color: '#475569' }}>
+              <p style={{ marginTop: 12, color: INK }}>
                 Take a photo of your receipt and we&apos;ll turn it into a tappable bill.
               </p>
               <input
@@ -162,11 +156,6 @@ export function Prototype() {
               <button type="button" onClick={() => fileInput.current?.click()} style={primaryBtn}>
                 Take a photo
               </button>
-              <div style={{ marginTop: 14 }}>
-                <button type="button" onClick={enterManually} style={linkBtn}>
-                  or enter items manually
-                </button>
-              </div>
             </>
           )}
         </div>
@@ -186,12 +175,12 @@ export function Prototype() {
     return (
       <Shell>
         <h2>Review the bill</h2>
-        <p style={{ color: '#64748B', marginTop: -8 }}>
+        <p style={{ color: INK, marginTop: -8 }}>
           {photoUrl ? 'Scanned from your photo — tap any field to fix it.' : 'Enter each item below.'}
         </p>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ textAlign: 'left', color: '#666', fontSize: 13 }}>
+            <tr style={{ textAlign: 'left', color: INK, fontSize: 13 }}>
               <th>Item</th>
               <th style={{ width: 60 }}>Qty</th>
               <th style={{ width: 110 }}>Unit ₪</th>
@@ -269,7 +258,7 @@ export function Prototype() {
         <p style={{ marginTop: 12, fontSize: 15 }}>
           Subtotal {fmt(subtotal)} · Receipt total <strong>{fmt(subtotal + taxCents)}</strong>
         </p>
-        <p style={{ marginTop: -6, fontSize: 13, color: '#64748B' }}>
+        <p style={{ marginTop: -6, fontSize: 13, color: INK }}>
           Each diner adds their own tip when they pick what they had.
         </p>
 
@@ -291,7 +280,7 @@ export function Prototype() {
   return (
     <Shell>
       <h2 style={{ marginBottom: 4 }}>Who had what?</h2>
-      <p style={{ color: '#64748B', marginTop: 0 }}>
+      <p style={{ color: INK, marginTop: 0 }}>
         Pick a diner, then tap the items they had. Shared items split automatically.
       </p>
 
@@ -306,7 +295,7 @@ export function Prototype() {
       {!activeDiner ? (
         <p style={{ color: '#DC2626', fontWeight: 600 }}>Add a diner to start tapping items.</p>
       ) : (
-        <p style={{ fontSize: 14, color: '#475569' }}>
+        <p style={{ fontSize: 14, color: INK }}>
           Tapping as{' '}
           <strong style={{ color: activeDiner.color }}>{activeDiner.name}</strong>
         </p>
@@ -332,18 +321,30 @@ export function Prototype() {
               onClick={() => toggleClaim(it.id)}
               disabled={!activeId}
               style={{
+                fontFamily: 'system-ui',
+                color: INK,
                 textAlign: 'left',
-                padding: 12,
-                borderRadius: 10,
+                padding: 14,
+                borderRadius: 12,
                 cursor: activeId ? 'pointer' : 'default',
-                border: mine ? '2px solid #2563EB' : '1px solid #E5E7EB',
-                background: unclaimed ? '#FEE2E2' : mine ? '#EFF6FF' : '#fff',
-                outline: unclaimed ? '2px dashed #DC2626' : 'none',
+                border: mine ? '2px solid #2563EB' : '1px solid #E2E8F0',
+                background: mine ? '#EFF6FF' : '#fff',
+                boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
+                transition: 'border-color 120ms, background 120ms',
               }}
             >
-              <div style={{ fontWeight: 600 }}>{it.name || 'Item'}</div>
-              <div style={{ color: '#374151' }}>{fmt(itemTotal(it))}</div>
-              <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap', minHeight: 14 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontWeight: 600 }}>{it.name || 'Item'}</span>
+                <span style={{ fontWeight: 600 }}>{fmt(itemTotal(it))}</span>
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', minHeight: 18 }}>
                 {claimers.map((id) => (
                   <span
                     key={id}
@@ -352,9 +353,9 @@ export function Prototype() {
                   />
                 ))}
                 {claimers.length > 1 && (
-                  <span style={{ fontSize: 11, color: '#2563EB' }}>split ×{claimers.length}</span>
+                  <span style={pillTag('#EFF6FF', '#2563EB')}>split ×{claimers.length}</span>
                 )}
-                {unclaimed && <span style={{ fontSize: 11, color: '#DC2626' }}>UNCLAIMED</span>}
+                {unclaimed && <span style={pillTag('#F1F5F9', INK)}>Unclaimed</span>}
               </div>
             </button>
           );
@@ -384,7 +385,7 @@ export function Prototype() {
         <strong>Live totals</strong>
         <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: 6, fontSize: 14 }}>
           <thead>
-            <tr style={{ textAlign: 'right', color: '#666' }}>
+            <tr style={{ textAlign: 'right', color: INK }}>
               <th style={{ textAlign: 'left' }}>Diner</th>
               <th>Items</th>
               <th>Tax</th>
@@ -553,7 +554,7 @@ function DinerPanel({
       }}
     >
       <strong>{diner.name}&apos;s tip</strong>
-      <p style={{ margin: '4px 0 10px', fontSize: 13, color: '#475569' }}>
+      <p style={{ margin: '4px 0 10px', fontSize: 13, color: INK }}>
         Tip on {fmt(items)} of items — their call.
       </p>
 
@@ -596,7 +597,7 @@ function DinerPanel({
                 onBlur={() => custom !== '' && onTip(Math.round(parseFloat(custom || '0') * 100))}
                 style={{ width: 80, padding: 6 }}
               />
-              <span style={{ fontSize: 13, color: '#475569' }}>₪</span>
+              <span style={{ fontSize: 13, color: INK }}>₪</span>
             </span>
           </div>
 
@@ -607,7 +608,7 @@ function DinerPanel({
           </p>
 
           {isPayer ? (
-            <p style={{ fontSize: 14, color: '#475569', marginTop: 4 }}>
+            <p style={{ fontSize: 14, color: INK, marginTop: 4 }}>
               💳 {diner.name} covered the bill — everyone else Bit-pays them back.
             </p>
           ) : (
@@ -791,15 +792,28 @@ function BitModal({
 // ── shared layout + style helpers ──────────────────────────────────────
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '2rem', maxWidth: 760, margin: '0 auto' }}>
-      <h1 style={{ marginBottom: 0 }}>Tally</h1>
-      <p style={{ color: '#555', marginTop: 6 }}>
+    <main style={{ fontFamily: 'system-ui', color: INK, padding: '2rem', maxWidth: 760, margin: '0 auto' }}>
+      <h1 style={{ marginBottom: 0 }}>Splity</h1>
+      <p style={{ color: INK, marginTop: 6 }}>
         Snap the receipt, tap what you had, add your tip, and pay with Bit.
       </p>
       {children}
     </main>
   );
 }
+
+// Shared ink color — one consistent text color across the app (no grey text).
+const INK = '#0F172A';
+
+// Small rounded tag used on the item cards, matching the app's pill aesthetic.
+const pillTag = (background: string, color: string): React.CSSProperties => ({
+  fontSize: 11,
+  fontWeight: 600,
+  padding: '2px 8px',
+  borderRadius: 999,
+  background,
+  color,
+});
 
 const primaryBtn: React.CSSProperties = {
   marginTop: 12,
@@ -810,13 +824,4 @@ const primaryBtn: React.CSSProperties = {
   border: 'none',
   borderRadius: 10,
   cursor: 'pointer',
-};
-
-const linkBtn: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  color: '#2563EB',
-  textDecoration: 'underline',
-  cursor: 'pointer',
-  fontSize: 14,
 };
