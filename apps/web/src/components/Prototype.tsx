@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Tally — self-contained client-side prototype (no backend).
+ * Splity — self-contained client-side prototype (no backend).
  *
  * A single-device walkthrough of the whole idea:
  *   1. capture  — snap/upload a photo of the receipt
@@ -12,7 +12,7 @@
  * Everything lives in React state — nothing is persisted or sent anywhere.
  */
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { fmt } from '@/lib/format';
 import { computeSplit, evenSplit, itemTotal, type PItem } from '@/lib/prototype/split';
 
@@ -87,8 +87,6 @@ export function Prototype() {
   const [claims, setClaims] = useState<Record<string, string[]>>({});
   const [payFor, setPayFor] = useState<Diner | null>(null);
 
-  const fileInput = useRef<HTMLInputElement>(null);
-
   // Turn a captured (or simulated) snapshot into the editable digital receipt.
   function digitize(previewUrl: string | null) {
     setPhotoUrl(previewUrl);
@@ -100,22 +98,10 @@ export function Prototype() {
     }, 1700);
   }
 
-  function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    digitize(URL.createObjectURL(file));
-  }
-
   // Prototype shortcut: tapping "Take a photo" jumps straight to a digital
   // receipt without needing a real camera/file, so the demo always works.
   function simulateCapture() {
     digitize(DEMO_RECEIPT_SVG);
-  }
-
-  function enterManually() {
-    setItems([{ id: newId(), name: '', qty: 1, unitCents: 0 }]);
-    setTaxCents(0);
-    setPhase('review');
   }
 
   // ── compute ───────────────────────────────────────────────────────────
@@ -192,28 +178,12 @@ export function Prototype() {
             <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--crav-red)' }}>Reading your receipt…</p>
           ) : (
             <>
-              <p style={{ marginTop: 12, color: '#475569' }}>
+              <p style={{ marginTop: 12, color: 'var(--crav-ink)' }}>
                 Take a photo of your receipt and we&apos;ll turn it into a tappable bill.
               </p>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={onPhoto}
-                style={{ display: 'none' }}
-              />
               <button type="button" onClick={simulateCapture} style={primaryBtn}>
                 Take a photo
               </button>
-              <div style={{ marginTop: 14, display: 'flex', gap: 16, justifyContent: 'center' }}>
-                <button type="button" onClick={() => fileInput.current?.click()} style={linkBtn}>
-                  upload a real photo
-                </button>
-                <button type="button" onClick={enterManually} style={linkBtn}>
-                  enter items manually
-                </button>
-              </div>
             </>
           )}
         </div>
@@ -233,12 +203,12 @@ export function Prototype() {
     return (
       <Shell>
         <h2>Review the bill</h2>
-        <p style={{ color: '#64748B', marginTop: -8 }}>
+        <p style={{ color: 'var(--crav-ink)', marginTop: -8 }}>
           {photoUrl ? 'Scanned from your photo — tap any field to fix it.' : 'Enter each item below.'}
         </p>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ textAlign: 'left', color: '#666', fontSize: 13 }}>
+            <tr style={{ textAlign: 'left', color: 'var(--crav-ink)', fontSize: 13 }}>
               <th>Item</th>
               <th style={{ width: 60 }}>Qty</th>
               <th style={{ width: 110 }}>Unit ₪</th>
@@ -316,7 +286,7 @@ export function Prototype() {
         <p style={{ marginTop: 12, fontSize: 15 }}>
           Subtotal {fmt(subtotal)} · Receipt total <strong>{fmt(subtotal + taxCents)}</strong>
         </p>
-        <p style={{ marginTop: -6, fontSize: 13, color: '#64748B' }}>
+        <p style={{ marginTop: -6, fontSize: 13, color: 'var(--crav-ink)' }}>
           Each diner adds their own tip when they pick what they had.
         </p>
 
@@ -361,7 +331,7 @@ export function Prototype() {
           ← Back to choosing
         </button>
         <h2 style={{ marginBottom: 4 }}>Review before paying</h2>
-        <p style={{ color: '#64748B', marginTop: 0 }}>
+        <p style={{ color: 'var(--crav-ink)', marginTop: 0 }}>
           Check who had what, then settle up with Bit.
         </p>
 
@@ -390,7 +360,7 @@ export function Prototype() {
         <section style={{ marginTop: 16 }}>
           <h3 style={{ marginBottom: 6 }}>🍽️ Shared meals</h3>
           {sharedItems.length === 0 ? (
-            <p style={{ color: '#94A3B8', margin: 0 }}>No shared meals.</p>
+            <p style={{ color: 'var(--crav-ink)', margin: 0 }}>No shared meals.</p>
           ) : (
             <ul style={mealList}>
               {sharedItems.map((it) => {
@@ -399,7 +369,7 @@ export function Prototype() {
                   <li key={it.id} style={mealRow}>
                     <div>
                       <strong>{it.name || 'Item'}</strong>{' '}
-                      <span style={{ color: '#64748B' }}>{fmt(itemTotal(it))}</span>
+                      <span style={{ color: 'var(--crav-ink)' }}>{fmt(itemTotal(it))}</span>
                       <span style={{ fontSize: 12, color: 'var(--crav-red)', marginLeft: 6 }}>
                         split ×{cs.length} = {fmt(Math.round(itemTotal(it) / cs.length))} each
                       </span>
@@ -422,7 +392,7 @@ export function Prototype() {
         <section style={{ marginTop: 16 }}>
           <h3 style={{ marginBottom: 6 }}>👤 Personal meals</h3>
           {personalItems.length === 0 ? (
-            <p style={{ color: '#94A3B8', margin: 0 }}>No personal meals.</p>
+            <p style={{ color: 'var(--crav-ink)', margin: 0 }}>No personal meals.</p>
           ) : (
             <ul style={mealList}>
               {personalItems.map((it) => {
@@ -431,7 +401,7 @@ export function Prototype() {
                   <li key={it.id} style={mealRow}>
                     <div>
                       <strong>{it.name || 'Item'}</strong>{' '}
-                      <span style={{ color: '#64748B' }}>{fmt(itemTotal(it))}</span>
+                      <span style={{ color: 'var(--crav-ink)' }}>{fmt(itemTotal(it))}</span>
                     </div>
                     <span style={chip(colorOf(owner))}>{nameOf(owner)} only</span>
                   </li>
@@ -468,7 +438,7 @@ export function Prototype() {
                   </div>
 
                   {rows.length === 0 ? (
-                    <p style={{ color: '#94A3B8', margin: '8px 0' }}>No meals selected.</p>
+                    <p style={{ color: 'var(--crav-ink)', margin: '8px 0' }}>No meals selected.</p>
                   ) : (
                     <ul style={{ ...mealList, marginTop: 8 }}>
                       {rows.map(({ item, shareCents, shared }) => (
@@ -486,13 +456,13 @@ export function Prototype() {
                     </ul>
                   )}
 
-                  <p style={{ margin: '8px 0 10px', fontSize: 14, color: '#475569' }}>
+                  <p style={{ margin: '8px 0 10px', fontSize: 14, color: 'var(--crav-ink)' }}>
                     Items {fmt(t?.itemsCents ?? 0)} · Tax {fmt(t?.taxCents ?? 0)} · Tip {fmt(t?.tipCents ?? 0)} ·{' '}
                     <strong style={{ fontSize: 16, color: '#0F172A' }}>{fmt(owe)}</strong>
                   </p>
 
                   {isPayer ? (
-                    <p style={{ fontSize: 13, color: '#475569', margin: 0 }}>
+                    <p style={{ fontSize: 13, color: 'var(--crav-ink)', margin: 0 }}>
                       💳 {d.name} covered the bill — collects from everyone else.
                     </p>
                   ) : d.paid ? (
@@ -507,7 +477,7 @@ export function Prototype() {
                         padding: '12px',
                         fontWeight: 800,
                         fontSize: 15,
-                        color: canPay ? '#062E2E' : '#64748B',
+                        color: canPay ? '#062E2E' : 'var(--crav-ink)',
                         background: canPay ? '#00C2C7' : 'var(--crav-cream-line)',
                         border: 'none',
                         borderRadius: 12,
@@ -541,7 +511,7 @@ export function Prototype() {
   return (
     <Shell>
       <h2 style={{ marginBottom: 4 }}>Who had what?</h2>
-      <p style={{ color: '#64748B', marginTop: 0 }}>
+      <p style={{ color: 'var(--crav-ink)', marginTop: 0 }}>
         Pick a diner, then tap the items they had. Shared items split automatically.
       </p>
 
@@ -556,7 +526,7 @@ export function Prototype() {
       {!activeDiner ? (
         <p style={{ color: '#DC2626', fontWeight: 600 }}>Add a diner to start tapping items.</p>
       ) : (
-        <p style={{ fontSize: 14, color: '#475569' }}>
+        <p style={{ fontSize: 14, color: 'var(--crav-ink)' }}>
           Tapping as{' '}
           <strong style={{ color: activeDiner.color }}>{activeDiner.name}</strong>
         </p>
@@ -587,29 +557,33 @@ export function Prototype() {
                 letterSpacing: 'normal',
                 color: 'var(--crav-ink)',
                 textAlign: 'left',
-                padding: 12,
-                borderRadius: 10,
-                boxShadow: '3px 3px 0 var(--crav-ink)',
+                padding: 14,
+                borderRadius: 'var(--radius-card)',
+                boxShadow: 'var(--shadow-hard)',
                 cursor: activeId ? 'pointer' : 'default',
                 border: mine ? '2px solid var(--crav-red)' : '2px solid var(--crav-ink)',
-                background: unclaimed ? '#FEE2E2' : mine ? '#FFF3E2' : '#fff',
-                outline: unclaimed ? '2px dashed #DC2626' : 'none',
+                background: mine ? 'var(--crav-yellow-soft)' : 'var(--crav-white)',
               }}
             >
-              <div style={{ fontWeight: 600 }}>{it.name || 'Item'}</div>
-              <div style={{ color: '#374151' }}>{fmt(itemTotal(it))}</div>
-              <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap', minHeight: 14 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontWeight: 800 }}>{it.name || 'Item'}</span>
+                <span style={{ fontWeight: 800 }}>{fmt(itemTotal(it))}</span>
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', minHeight: 24 }}>
                 {claimers.map((id) => (
-                  <span
-                    key={id}
-                    title={nameOf(id)}
-                    style={{ width: 14, height: 14, borderRadius: 999, background: colorOf(id) }}
-                  />
+                  <span key={id} style={chip(colorOf(id))}>
+                    {nameOf(id)}
+                  </span>
                 ))}
-                {claimers.length > 1 && (
-                  <span style={{ fontSize: 11, color: 'var(--crav-red)' }}>split ×{claimers.length}</span>
-                )}
-                {unclaimed && <span style={{ fontSize: 11, color: '#DC2626' }}>UNCLAIMED</span>}
+                {claimers.length > 1 && <span style={tag}>split ×{claimers.length}</span>}
+                {unclaimed && <span style={tag}>Unclaimed</span>}
               </div>
             </button>
           );
@@ -638,7 +612,7 @@ export function Prototype() {
         <strong>Live totals</strong>
         <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: 6, fontSize: 14 }}>
           <thead>
-            <tr style={{ textAlign: 'right', color: '#666' }}>
+            <tr style={{ textAlign: 'right', color: 'var(--crav-ink)' }}>
               <th style={{ textAlign: 'left' }}>Diner</th>
               <th>Items</th>
               <th>Tax</th>
@@ -810,7 +784,7 @@ function DinerPanel({
       }}
     >
       <strong>{diner.name}&apos;s tip</strong>
-      <p style={{ margin: '4px 0 10px', fontSize: 13, color: '#475569' }}>
+      <p style={{ margin: '4px 0 10px', fontSize: 13, color: 'var(--crav-ink)' }}>
         Tip on {fmt(items)} of items — their call.
       </p>
 
@@ -847,7 +821,7 @@ function DinerPanel({
             onBlur={() => custom !== '' && onTip(Math.round(parseFloat(custom || '0') * 100))}
             style={{ width: 80, padding: 6 }}
           />
-          <span style={{ fontSize: 13, color: '#475569' }}>₪</span>
+          <span style={{ fontSize: 13, color: 'var(--crav-ink)' }}>₪</span>
         </span>
       </div>
 
@@ -858,7 +832,7 @@ function DinerPanel({
       </p>
 
       {isPayer && (
-        <p style={{ fontSize: 14, color: '#475569', marginTop: 4 }}>
+        <p style={{ fontSize: 14, color: 'var(--crav-ink)', marginTop: 4 }}>
           💳 {diner.name} covered the bill — everyone else Bit-pays them back.
         </p>
       )}
@@ -955,7 +929,7 @@ function BitModal({
             <>
               <div style={{ fontSize: 52 }}>✅</div>
               <p style={{ fontWeight: 800, fontSize: 18, margin: '8px 0 2px' }}>Payment sent</p>
-              <p style={{ color: '#475569', margin: 0 }}>
+              <p style={{ color: 'var(--crav-ink)', margin: 0 }}>
                 {fmt(amountCents)} to {payeeName}
               </p>
               <button
@@ -977,9 +951,9 @@ function BitModal({
             </>
           ) : (
             <>
-              <p style={{ color: '#475569', margin: '0 0 4px' }}>Paying</p>
+              <p style={{ color: 'var(--crav-ink)', margin: '0 0 4px' }}>Paying</p>
               <div style={{ fontSize: 40, fontWeight: 900, color: '#0F172A' }}>{fmt(amountCents)}</div>
-              <p style={{ color: '#475569', margin: '6px 0 0' }}>
+              <p style={{ color: 'var(--crav-ink)', margin: '6px 0 0' }}>
                 to <strong>{payeeName}</strong>
               </p>
               <div
@@ -989,7 +963,7 @@ function BitModal({
                   background: '#FBF1DC',
                   borderRadius: 10,
                   fontSize: 13,
-                  color: '#64748B',
+                  color: 'var(--crav-ink)',
                 }}
               >
                 Linked: Visa •••• 4821
@@ -1021,7 +995,7 @@ function BitModal({
                     marginTop: 10,
                     background: 'none',
                     border: 'none',
-                    color: '#64748B',
+                    color: 'var(--crav-ink)',
                     cursor: 'pointer',
                   }}
                 >
@@ -1113,3 +1087,16 @@ const chip = (color: string): React.CSSProperties => ({
   color: '#fff',
   background: color,
 });
+
+// Small cream "sticker" pill used for status labels on the item cards,
+// matching the warm sticker look of the rest of the UI.
+const tag: React.CSSProperties = {
+  fontFamily: 'var(--font-body)',
+  fontSize: 11,
+  fontWeight: 700,
+  padding: '2px 8px',
+  borderRadius: 999,
+  border: '1.5px solid var(--crav-ink)',
+  background: 'var(--crav-cream-soft)',
+  color: 'var(--crav-ink)',
+};
