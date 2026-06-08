@@ -33,7 +33,7 @@ export function ShareLink({ joinCode }: { joinCode: string }) {
   return (
     <section
       style={{
-        background: '#F9FAFB',
+        background: '#FBF1DC',
         borderRadius: 10,
         padding: 16,
         display: 'flex',

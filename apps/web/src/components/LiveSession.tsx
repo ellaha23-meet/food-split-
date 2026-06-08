@@ -124,7 +124,7 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
                 gap: 6,
                 padding: '4px 10px',
                 borderRadius: 999,
-                background: '#F3F4F6',
+                background: '#FBF1DC',
                 fontWeight: p.id === participantId ? 700 : 400,
               }}
             >
@@ -158,12 +158,17 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
                 onClick={() => void toggleClaim(item.id)}
                 disabled={!participantId || locked}
                 style={{
+                  fontFamily: 'var(--font-body)',
+                  textTransform: 'none',
+                  letterSpacing: 'normal',
+                  color: 'var(--crav-ink)',
                   textAlign: 'left',
                   padding: 12,
                   borderRadius: 10,
+                  boxShadow: '3px 3px 0 var(--crav-ink)',
                   cursor: participantId && !locked ? 'pointer' : 'default',
-                  border: mineItem ? '2px solid #2563EB' : '1px solid #E5E7EB',
-                  background: unclaimed ? '#FEE2E2' : mineItem ? '#EFF6FF' : '#fff',
+                  border: mineItem ? '2px solid var(--crav-red)' : '2px solid var(--crav-ink)',
+                  background: unclaimed ? '#FEE2E2' : mineItem ? '#FFF3E2' : '#fff',
                   outline: unclaimed ? '2px dashed #DC2626' : 'none',
                 }}
               >
@@ -178,7 +183,7 @@ export function LiveSession({ sessionId, participantId, isHost = false }: LiveSe
                     />
                   ))}
                   {claimers.length > 1 && (
-                    <span style={{ fontSize: 11, color: '#2563EB' }}>split ×{claimers.length}</span>
+                    <span style={{ fontSize: 11, color: 'var(--crav-red)' }}>split ×{claimers.length}</span>
                   )}
                   {unclaimed && <span style={{ fontSize: 11, color: '#DC2626' }}>UNCLAIMED</span>}
                 </div>
@@ -324,8 +329,8 @@ function DinerPanel({
       style={{
         marginTop: 16,
         padding: 16,
-        background: '#F0F9FF',
-        border: '1px solid #BAE6FD',
+        background: '#FBF1DC',
+        border: '1px solid var(--crav-yellow)',
         borderRadius: 12,
       }}
     >
@@ -347,8 +352,8 @@ function DinerPanel({
                 style={{
                   padding: '8px 14px',
                   borderRadius: 999,
-                  border: active ? '2px solid #2563EB' : '1px solid #CBD5E1',
-                  background: active ? '#2563EB' : '#fff',
+                  border: active ? '2px solid var(--crav-red)' : '1px solid var(--crav-cream-line)',
+                  background: active ? 'var(--crav-red)' : '#fff',
                   color: active ? '#fff' : '#0F172A',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -396,7 +401,7 @@ function DinerPanel({
             fontWeight: 800,
             fontSize: 16,
             color: '#062E2E',
-            background: totalCents > 0 ? '#00C2C7' : '#CBD5E1',
+            background: totalCents > 0 ? '#00C2C7' : 'var(--crav-cream-line)',
             border: 'none',
             borderRadius: 12,
             cursor: totalCents > 0 ? 'pointer' : 'not-allowed',
@@ -530,7 +535,7 @@ function BitModal({
                 style={{
                   marginTop: 16,
                   padding: '10px 12px',
-                  background: '#F1F5F9',
+                  background: '#FBF1DC',
                   borderRadius: 10,
                   fontSize: 13,
                   color: '#64748B',
