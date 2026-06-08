@@ -8,7 +8,8 @@ Current assets:
 
 - `burger.png`    — cheeseburger
 - `fries.png`     — fries
-- `spaghetti.png` — plate of spaghetti
+- `pizza.png`     — cheese pizza
+- `spaghetti.png` — plate of spaghetti (no longer used)
 - `milkshake.png` — milkshake
 
 To add, move, resize, or rotate an item, edit the `FOOD` array in

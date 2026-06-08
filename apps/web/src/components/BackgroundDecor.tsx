@@ -24,9 +24,9 @@ const BOTTOM_COLOR = '#fb2a1b'; // --crav-red, bottom band — red rises up into
 const FOOD = [
   { src: '/food/burger.png', top: '10%', left: '1%', size: 200, rotate: -12 },
   { src: '/food/milkshake.png', top: '30%', right: '1%', size: 135, rotate: -6 },
-  { src: '/food/spaghetti.png', top: '57%', left: '3%', size: 110, rotate: 9 },
+  { src: '/food/pizza.png', top: '57%', left: '3%', size: 110, rotate: 9 },
   { src: '/food/burger.png', bottom: '15%', right: '27%', size: 80, rotate: 15 },
-  { src: '/food/spaghetti.png', bottom: '6%', right: '2%', size: 190, rotate: -15 },
+  { src: '/food/pizza.png', bottom: '6%', right: '2%', size: 190, rotate: -15 },
 ];
 
 export function BackgroundDecor() {

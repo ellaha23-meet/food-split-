@@ -660,11 +660,12 @@ export function Prototype() {
         </table>
       </section>
 
-      <p style={{ marginTop: 14, fontSize: 14, color: allDone ? '#047857' : '#B45309' }}>
-        {allDone
-          ? `✓ All ${diners.length} ${diners.length === 1 ? 'friend has' : 'friends have'} confirmed their picks.`
-          : `${doneCount} of ${diners.length || 0} friends have confirmed — tap a friend, then “I'm done choosing”.`}
-      </p>
+      {allDone && (
+        <p style={{ marginTop: 14, fontSize: 14, color: '#047857' }}>
+          ✓ All {diners.length} {diners.length === 1 ? 'friend has' : 'friends have'} confirmed their
+          picks.
+        </p>
+      )}
       <button
         type="button"
         disabled={diners.length === 0}
