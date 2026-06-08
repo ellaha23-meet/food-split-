@@ -2,6 +2,8 @@
 
 *Companion to `tallyspec.md`. This document turns the product spec into a buildable, sequenced engineering plan: stack decisions, data model, the reconciliation engine, milestone-by-milestone delivery, testing, security/privacy, risks, and the MVP cut line.*
 
+> **See also `PHASES.md`** — the milestones below are decomposed there into ~35 small, independently-verifiable phases, each with a strict contract (hard constraints + binary exit criteria) and project-wide guardrails.
+
 ---
 
 ## 1. Executive summary
