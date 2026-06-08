@@ -31,7 +31,7 @@ export interface SplitResult {
 }
 
 /** Spread `total` across `n` recipients as evenly as possible (cents-exact). */
-function evenSplit(total: number, n: number): number[] {
+export function evenSplit(total: number, n: number): number[] {
   if (n <= 0) return [];
   const base = Math.floor(total / n);
   const rem = total - base * n;
